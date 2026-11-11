@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --bg: #F7F7FC;
+  --bg-deep: #F1F0FA;
+  --card: #FFFFFF;
+  --card-border: #E7E5F3;
+  --gold: #6C5CE7;
+  --gold-soft: rgba(108,92,231,0.10);
+  --coral: #E8527A;
+  --mint: #1FAE6E;
+  --sky: #4A6CF7;
+  --text: #17162B;
+  --text-dim: #5B5A72;
+  --text-faint: #9694AC;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  min-height:100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   SIDEBAR NAVIGATION SHELL — окремі "сторінки", а не один скрол
+============================================================ */
+.app-shell{ display:flex; min-height:100vh; align-items:flex-start; }
+.sidebar{
+  width: 250px; flex-shrink:0; background: var(--card); border-right:1px solid var(--card-border);
+  padding: 20px 12px 20px; display:flex; flex-direction:column; gap:2px;
+  min-height:100vh; position: sticky; top:0;
+}
+.sidebar-brand{ display:flex; align-items:center; gap:8px; padding: 4px 10px 6px; font-weight:800; font-size:16px; }
+.sidebar-brand .who{ font-size:11px; color:var(--text-faint); font-weight:500; padding: 0 10px 16px; }
+.sidebar-item{
+  display:flex; align-items:center; gap:9px; padding:9px 10px; border-radius:9px;
+  font-size:13.5px; font-weight:600; color:var(--text-dim); cursor:pointer; user-select:none;
+}
+.sidebar-item:hover{ background: var(--bg-deep); }
+.sidebar-item.active{ background: var(--gold-soft); color: var(--gold); }
+.sidebar-item .ic{ width:18px; text-align:center; flex-shrink:0; font-size:14px; }
+.sidebar-item .lbl{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sidebar-badge{ background: var(--coral); color:#fff; font-size:10px; font-weight:800; border-radius:999px; padding:1px 6px; min-width:16px; text-align:center; }
+.sidebar-section-label{ font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint); margin:16px 10px 4px; font-weight:800; }
+.sidebar-divider{ height:1px; background: var(--card-border); margin: 12px 6px; }
+
+.main-wrap{ flex:1; min-width:0; }
+.main-content{ max-width: 900px; margin: 0 auto; padding: 24px 28px 70px; }
+
+.content-header{ display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom: 20px; flex-wrap: wrap; }
+.content-title{ font-family:'Inter', sans-serif; font-size: 22px; font-weight:800; }
+.content-header-right{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+.lang-toggle{ display:flex; border:1px solid var(--card-border); border-radius:999px; overflow:hidden; }
+.lang-btn{ border:none; background: var(--card); color: var(--text-dim); font-family:'Inter',sans-serif; font-weight:700; font-size:11.5px; padding: 7px 12px; cursor:pointer; }
+.lang-btn.active{ background: var(--gold); color:#FFFFFF; }
+
+.pill{ display:flex; align-items:center; gap:8px; padding: 9px 15px; border-radius: 999px; border:1px solid var(--card-border); background: var(--card); font-weight:600; font-size: 13.5px; white-space:nowrap; }
+.pill.coins{ border-color: rgba(108,92,231,0.35); }
+.pill.kudos{ border-color: rgba(232,82,122,0.35); }
+.pill.admin{ border-color: rgba(74,108,247,0.4); color: var(--sky); }
+
+.announcement{
+  background: var(--gold-soft); border: 1px solid rgba(108,92,231,0.35);
+  border-radius: 14px; padding: 12px 16px; margin-bottom: 22px;
+  font-size: 13px; color: var(--text); display:flex; align-items:center; gap:8px;
+}
+
+.section-title{ font-family:'Inter', sans-serif; font-size: 17px; font-weight:700; margin: 26px 0 4px; }
+.section-title:first-child{ margin-top:0; }
+.section-sub{ font-size:12.5px; color: var(--text-faint); margin-bottom:16px; }
+
+.stat-cards{ display:grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap:14px; margin-bottom: 22px; }
+.stat-card{ background: var(--card); border:1px solid var(--card-border); border-radius:16px; padding:16px 18px; }
+.stat-card .lbl{ font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.03em; margin-bottom:6px; font-weight:700; }
+.stat-card .val{ font-size:24px; font-weight:800; display:flex; align-items:center; gap:6px; }
+
+.progress-panel{border-radius:18px;padding:18px 20px;margin-bottom:22px;border:1px solid rgba(108,92,231,0.22);background:linear-gradient(135deg,rgba(108,92,231,0.07),rgba(74,108,247,0.03));}
+.progress-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;margin-bottom:10px;}
+.progress-title{font-size:15px;font-weight:700;}
+.progress-value{font-size:12px;color:var(--text-dim);}
+.progress-track{height:9px;border-radius:999px;background:var(--bg-deep);overflow:hidden;border:1px solid var(--card-border);}
+.progress-fill{height:100%;background:var(--gold);border-radius:999px;transition:width .25s ease;}
+.progress-note{font-size:11.5px;color:var(--text-faint);margin-top:8px;}
+
+.history{display:flex;flex-direction:column;gap:8px;}
+.history-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--card-border);font-size:12.5px;}
+.history-item:last-child{border-bottom:none;}
+.history-main{min-width:0;}
+.history-main b{color:var(--text);}
+.history-source{display:block;color:var(--text-faint);font-size:11px;margin-top:2px;}
+.history-amount{font-weight:800;white-space:nowrap;}
+.history-amount.earn{color:var(--mint);}
+.history-amount.spend{color:var(--coral);}
+
+.table-tabs{ display:flex; gap:8px; margin-bottom:14px; }
+.table-tab{ font-size:12.5px; font-weight:700; padding:7px 13px; border-radius:999px; background:var(--bg-deep); color:var(--text-dim); cursor:pointer; }
+.table-tab.active{ background: var(--text); color:#fff; }
+
+.panel{ border-radius: 18px; padding: 20px; margin-bottom: 22px; border: 1px solid var(--card-border); background: var(--card); }
+.panel.kudos-panel{ background: linear-gradient(135deg, rgba(232,82,122,0.05), rgba(108,92,231,0.03)); border-color: rgba(232,82,122,0.22); }
+.panel.claim-panel{ background: linear-gradient(135deg, rgba(74,108,247,0.05), rgba(108,92,231,0.03)); border-color: rgba(74,108,247,0.22); }
+.panel.admin-panel{ background: linear-gradient(135deg, rgba(108,92,231,0.06), rgba(232,82,122,0.03)); border-color: rgba(108,92,231,0.25); }
+.panel-title{ font-family:'Inter', sans-serif; font-size: 16.5px; font-weight: 600; margin-bottom: 12px; display:flex; align-items:center; gap:6px; }
+.panel-note{ font-size:12px; color:var(--text-dim); margin-bottom:10px; }
+
+.form-row{ display:flex; gap:10px; flex-wrap: wrap; }
+.form-row select, .form-row textarea, .form-row input[type=text], .form-row input[type=number]{
+  background: var(--bg-deep); border: 1px solid var(--card-border); border-radius: 10px;
+  padding: 10px 12px; color: var(--text); font-family:'Inter',sans-serif; font-size: 13.5px; outline: none;
+}
+.form-row select{ flex: 1 1 200px; }
+.form-row textarea{ flex: 2 1 260px; resize: none; min-height: 40px; }
+.form-row input[type=text]{ flex: 1 1 160px; }
+.form-row input[type=number]{ width: 90px; }
+.form-row select:focus, .form-row textarea:focus, .form-row input:focus{ border-color: var(--sky); }
+
+.combo-wrap{ position: relative; flex: 1 1 200px; }
+.combo-wrap input.combo-input{ width: 100%; }
+.combo-dropdown{
+  display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; z-index: 20;
+  background: var(--card); border:1px solid var(--card-border); border-radius:10px;
+  max-height: 220px; overflow-y:auto; box-shadow: 0 8px 20px rgba(23,22,43,0.12);
+}
+.combo-item{ padding: 9px 12px; font-size:13.5px; cursor:pointer; }
+.combo-item:hover, .combo-item.active{ background: var(--bg-deep); }
+.combo-empty{ padding: 9px 12px; font-size:12.5px; color: var(--text-faint); }
+
+.btn{
+  border:none; border-radius:10px; padding:0 18px; height: 40px;
+  font-weight:700; font-size:13.5px; cursor:pointer; font-family:'Inter',sans-serif;
+}
+.btn.pink{ background: var(--coral); color:#FFFFFF; }
+.btn.blue{ background: var(--sky); color:#FFFFFF; }
+.btn.gold{ background: var(--gold); color:#FFFFFF; }
+.btn.mint{ background: var(--mint); color:#FFFFFF; }
+.btn.ghost{ background: var(--bg-deep); color: var(--text-dim); }
+.btn:disabled{ background: var(--card-border); color: var(--text-faint); cursor:not-allowed; }
+
+.hint{ font-size:11.5px; color: var(--text-faint); margin: 6px 0 10px; }
+
+.feed{ margin-top:14px; display:flex; flex-direction:column; gap:7px; }
+.feed-item{ font-size:12.5px; color: var(--text-dim); }
+.feed-item b{ color: var(--text); }
+.feed-item.sent{ color: var(--text-dim); }
+.feed-item.received{ color: var(--text); }
+
+.badge{ display:inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight:700; }
+.badge.pending{ background: rgba(108,92,231,0.18); color: var(--gold); }
+.badge.approved{ background: rgba(31,174,110,0.18); color: var(--mint); }
+.badge.rejected{ background: rgba(232,82,122,0.18); color: var(--coral); }
+
+.sub-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding: 8px 0; border-bottom: 1px solid var(--card-border); font-size:12.5px; }
+.sub-row:last-child{ border-bottom: none; }
+.sub-row-main{ display:flex; flex-direction:column; gap:2px; }
+.sub-row-main .cat{ color: var(--text); font-weight:600; }
+.sub-row-main .coins{ color: var(--gold); font-weight:600; }
+
+.pending-item{ padding: 10px 0; border-bottom: 1px solid var(--card-border); }
+.pending-item:last-child{ border-bottom:none; }
+.pending-top{ display:flex; justify-content:space-between; gap:8px; margin-bottom:4px; font-size:12.5px; }
+.pending-top b{ color: var(--text); }
+.pending-proof{ font-size:12px; color: var(--text-dim); margin-bottom:8px; }
+.pending-actions{ display:flex; gap:8px; }
+.pending-actions .btn{ height:32px; padding: 0 14px; font-size:12px; }
+
+.admin-list{ display:flex; flex-direction:column; gap:6px; margin-bottom: 12px; }
+.admin-chip{ display:flex; justify-content:space-between; align-items:center; background: var(--bg-deep); border-radius:10px; padding:7px 12px; font-size:12.5px; }
+.admin-chip .owner-tag{ font-size:10px; color: var(--text-faint); }
+.admin-chip button{ background:none; border:none; color: var(--coral); cursor:pointer; font-size:12px; font-weight:700; }
+
+.lb-card{ border-radius: 16px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); margin-bottom: 18px; }
+.lb-card-title{ font-family:'Inter', sans-serif; font-size: 14.5px; font-weight: 600; margin-bottom: 10px; display:flex; align-items:center; gap:6px; }
+.lb-card-note{ font-size:11px; color: var(--text-faint); margin: -6px 0 10px; line-height:1.4; }
+.lb-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px solid var(--card-border); font-size:13px; }
+.lb-row:last-child{ border-bottom:none; }
+.lb-row-left{ display:flex; align-items:flex-start; gap:8px; min-width:0; }
+.lb-marker{ display:inline-block; width:20px; flex-shrink:0; color: var(--text-faint); font-weight:700; font-size:13px; line-height:1.3; }
+.lb-name{ font-weight:600; font-size:13px; color: var(--text); line-height:1.3; }
+.lb-value{ color: var(--gold); font-weight:700; font-size:13px; white-space:nowrap; flex-shrink:0; padding-top:1px; }
+
+.grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap:14px; }
+.card{ background: var(--card); border:1px solid var(--card-border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; }
+.card.sold-out{ opacity:.5; }
+.card-media{ height:100px; display:flex; align-items:center; justify-content:center; font-size:42px; background: var(--bg-deep); }
+.card-body{ padding:13px 14px 14px; display:flex; flex-direction:column; gap:7px; flex:1; }
+.card-top{ display:flex; justify-content:space-between; gap:8px; }
+.card-name{ font-weight:600; font-size:13.5px; }
+.card-price{ font-weight:700; font-size:13px; color: var(--gold); white-space:nowrap; }
+.card-desc{ font-size:11.5px; color: var(--text-faint); min-height: 28px; line-height:1.4; }
+.card-stock{ font-size:11px; color: var(--mint); }
+.card-action{ margin-top:auto; border:none; border-radius:9px; padding:8px 0; font-weight:700; font-size:12.5px; cursor:pointer; font-family:'Inter',sans-serif; }
+.card-action.buy{ background: var(--gold); color:#FFFFFF; }
+.card-action.locked{ background: var(--bg-deep); color: var(--text-faint); cursor:not-allowed; }
+.card-action.owned{ background: var(--mint); color:#FFFFFF; cursor:default; }
+
+.toast{
+  position: fixed; bottom: 22px; left:50%; transform: translateX(-50%) translateY(20px);
+  background:#17162B; border:1px solid rgba(255,255,255,0.1); color: #FFFFFF;
+  padding: 11px 18px; border-radius: 12px; font-size: 13px; opacity:0; transition: opacity .25s, transform .25s;
+  pointer-events:none; box-shadow: 0 8px 24px rgba(0,0,0,.25); max-width: 90%; text-align:center;
+}
+.toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+.loading-note, .error-note{ color: var(--text-faint); font-size:17px; font-weight:600; width:100%; min-height:100vh; display:flex; align-items:center; justify-content:center; text-align:center; }
+.error-note{ color: #D6395C; }
+
+.modal-overlay{
+  position: fixed; inset: 0; background: rgba(23,16,28,0.72);
+  display:flex; align-items:center; justify-content:center; padding: 20px;
+  z-index: 100; opacity:0; pointer-events:none; transition: opacity .18s;
+}
+.modal-overlay.show{ opacity:1; pointer-events:auto; }
+.modal-box{
+  background-color: #FFFFFF; opacity: 1;
+  border:1px solid var(--card-border); border-radius: 18px;
+  padding: 24px; max-width: 360px; width:100%; text-align:center;
+  box-shadow: 0 20px 60px rgba(23,22,43,0.35);
+  transform: translateY(8px) scale(.98); transition: transform .18s;
+}
+.modal-overlay.show .modal-box{ transform: translateY(0) scale(1); }
+.modal-emoji{ font-size: 40px; margin-bottom: 10px; }
+.modal-title{ font-family:'Inter', sans-serif; font-size: 18px; font-weight:600; margin-bottom: 6px; }
+.modal-sub{ font-size: 13px; color: var(--text-dim); margin-bottom: 4px; }
+.modal-price{ font-size: 15px; color: var(--gold); font-weight:700; margin-bottom: 18px; }
+.modal-actions{ display:flex; gap:10px; }
+.modal-btn{ flex:1; border:none; border-radius:10px; padding: 11px 0; font-weight:700; font-size:13.5px; cursor:pointer; font-family:'Inter',sans-serif; }
+.modal-btn.cancel{ background: var(--bg-deep); color: var(--text-dim); }
+.modal-btn.confirm{ background: var(--gold); color:#FFFFFF; }
+.modal-btn:disabled{ opacity:.6; cursor:not-allowed; }
+.modal-success .modal-title{ color: var(--mint); }
+.modal-success .modal-sub{ margin-bottom: 18px; }
+.modal-btn.close-success{ background: var(--mint); color:#FFFFFF; width:100%; }
+
+.cat-groups{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 12px; }
+.cat-group-btn{ border:1px solid var(--card-border); background: var(--bg-deep); color: var(--text-dim); border-radius:999px; padding:8px 14px; font-family:'Inter',sans-serif; font-weight:700; font-size:12.5px; cursor:pointer; white-space:nowrap; }
+.cat-group-btn.active{ background: var(--sky); border-color: var(--sky); color:#FFFFFF; }
+.cat-group-empty{ font-size:12.5px; color:var(--text-faint); padding: 10px 0; }
+.campaign-chip-group{ margin-bottom: 14px; }
+.campaign-chip-group-title{ font-size:11.5px; font-weight:700; color: var(--text-faint); text-transform:uppercase; letter-spacing:.03em; margin: 10px 0 6px; }
+
+.card.achievement-locked{ opacity:.55; }
+.achievement-badge-emoji{ font-size:36px; }
+.achievement-coins-tag{ font-size:11px; font-weight:800; color:var(--gold); background:var(--gold-soft); border-radius:999px; padding:2px 10px; display:inline-block; }
+
+.ach-teaser{ border:1px solid var(--card-border); background:var(--card); border-radius:14px; padding:14px 16px; margin-bottom:10px; cursor:pointer; }
+.ach-teaser-head{ display:flex; align-items:center; gap:12px; }
+.ach-teaser-emoji{ font-size:26px; flex-shrink:0; }
+.ach-teaser-body{ flex:1; min-width:0; }
+.ach-teaser-title{ font-weight:700; font-size:13.5px; display:flex; align-items:center; gap:8px; }
+.ach-teaser-frac{ font-size:11.5px; color:var(--text-faint); font-weight:700; }
+.ach-teaser-track{ height:6px; border-radius:999px; background:var(--bg-deep); overflow:hidden; margin-top:6px; }
+.ach-teaser-fill{ height:100%; background:var(--gold); border-radius:999px; }
+.ach-teaser-chevron{ color:var(--text-faint); font-size:12px; flex-shrink:0; transition:transform .15s; }
+.ach-teaser.expanded .ach-teaser-chevron{ transform:rotate(90deg); }
+.ach-teaser-tasks{ display:none; margin-top:12px; padding-top:12px; border-top:1px solid var(--card-border); }
+.ach-teaser.expanded .ach-teaser-tasks{ display:block; }
+.ach-task-row{ display:flex; align-items:center; gap:9px; padding:5px 0; font-size:12.5px; }
+.ach-task-row .chk{ width:16px; height:16px; border-radius:5px; border:1.5px solid var(--card-border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; }
+.ach-task-row.done .chk{ background:var(--mint); border-color:var(--mint); color:#fff; }
+.ach-task-row.done .lbl{ color:var(--text-faint); text-decoration:line-through; }
+.ach-task-row .amt{ margin-left:auto; color:var(--gold); font-weight:700; font-size:11.5px; }
+.ach-part-tag{ display:inline-block; font-size:10.5px; font-weight:700; color:var(--gold); background:var(--gold-soft); border-radius:999px; padding:2px 9px; margin-top:6px; }
+
+@media (max-width: 560px){
+  .sidebar{ width: 210px; padding: 16px 8px; }
+  .sidebar-item .lbl{ font-size:12.5px; }
+  .main-content{ padding: 18px 14px 60px; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell" id="app">
+  <div class="loading-note">Loading your balance… / Завантажуємо ваш баланс…</div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="modal-overlay" id="modal-overlay"><div class="modal-box" id="modal-box"></div></div>
+
+<script>
+const BUILD_VERSION = '2026-09-15 · v28';
+
+let state = null;
+let pendingRewardId = null;
+
+let currentLang = (function(){
+  try { return localStorage.getItem('teamcoins_lang') || 'ua'; } catch(e){ return 'ua'; }
+})();
+
+// Сторінкова навігація: currentPage визначає, яка "сторінка" рендериться
+// в main-content, а сайдбар підсвічує активний пункт.
+let currentPage = 'home';
+let activeClaimGroup = 'base';
+let myRecordsFilter = 'all';
+let statsData = null;
+let statsLoading = false;
+let expandedAchievementId = null;
+function toggleAchievementTeaser_(id){ expandedAchievementId = (expandedAchievementId === id) ? null : id; render(); }
+
+function setPage(pageId){
+  currentPage = pageId;
+  if (pageId === 'stats' && !statsData && !statsLoading) loadStats_();
+  render();
+}
+
+const NAV_ITEMS = [
+  { id:'home',        icon:'🏠', labelKey:'navHome' },
+  { id:'kudos',       icon:'💜', labelKey:'navKudos' },
+  { id:'claim',       icon:'📝', labelKey:'navClaim' },
+  { id:'shop',        icon:'🎁', labelKey:'navShop' },
+  { id:'leaders',     icon:'🏆', labelKey:'navLeaders' },
+  { id:'achievements',icon:'🏅', labelKey:'navAchievements' },
+  { id:'feedback',    icon:'💬', labelKey:'navFeedback' },
+];
+const ADMIN_NAV_ITEMS = [
+  { id:'pending',           icon:'🛠️', labelKey:'navPending',           visible: s => s.isAdmin,                 badge: s => s.pendingSubmissions.length },
+  { id:'secretcoin',        icon:'🪙', labelKey:'navSecretCoin',        visible: s => s.isAdmin || s.isManager },
+  { id:'stats',             icon:'📊', labelKey:'navStats',             visible: s => s.isAdmin },
+  { id:'people',            icon:'👥', labelKey:'navPeople',            visible: s => s.isAdmin },
+  { id:'shopadmin',         icon:'🎁', labelKey:'navShopAdmin',         visible: s => s.isAdmin },
+  { id:'campaignadmin',     icon:'🎯', labelKey:'navCampaignAdmin',     visible: s => s.isAdmin },
+  { id:'suggestionsadmin',  icon:'💬', labelKey:'navSuggestionsAdmin',  visible: s => s.isAdmin,                 badge: s => s.pendingSuggestions.length },
+];
+
+const T = {
+  ua: {
+    loading: 'Завантажуємо ваш баланс…',
+    admin: 'Адмін',
+    managerBadge: 'Менеджер',
+    navHome: 'Мій кабінет',
+    navKudos: 'Дати Kudos',
+    navClaim: 'Подати заявку',
+    navShop: 'Reward Shop',
+    navLeaders: 'Лідери',
+    navAchievements: 'Ачівки',
+    navFeedback: 'Відгуки',
+    navPending: 'Заявки на розгляд',
+    navSecretCoin: 'Secret Coin',
+    navStats: 'Статистика',
+    navPeople: 'Адміни та менеджери',
+    navShopAdmin: 'Товари Reward Shop',
+    navCampaignAdmin: 'Кампанійні активності',
+    navSuggestionsAdmin: 'Нові відгуки',
+    adminSectionLabel: 'Адмін',
+    homeGreeting: name => `Привіт, ${name} 👋`,
+    homeSub: 'Останнє оновлення щойно · зафільтровано лише твої записи',
+    statBalance: 'Баланс',
+    statKudosLeft: 'Kudos залишилось',
+    statPending: 'Заявок на розгляді',
+    tableAll: 'Всі мої записи',
+    tableApprovedOnly: 'Тільки Approved',
+    colType: 'Тип',
+    colCategory: 'Категорія',
+    colCoins: 'Coins',
+    colStatus: 'Статус',
+    rowKudosReceived: 'Kudos отримано',
+    rowClaim: 'Заявка',
+    rowOrder: 'Замовлення',
+    myRecordsEmpty: 'Записів ще немає.',
+    statsModalTitle: '📊 Статистика платформи',
+    statsLoading: 'Рахуємо…',
+    statsEngagementTitle: 'Залученість',
+    statsTotalUsers: n => `${n} зареєстрованих користувачів`,
+    statsTotalCoinsHeld: (n, ce) => `${n} ${ce} зараз на балансах (не витрачено)`,
+    statsKudosTitle: 'Kudos',
+    statsKudosGiven: n => `${n} Kudos надіслано всього`,
+    statsKudosGivers: n => `${n} людей хоч раз давали Kudos`,
+    statsKudosReceivers: n => `${n} людей хоч раз отримували Kudos`,
+    statsClaimsTitle: 'Заявки на Coins',
+    statsClaimsTotal: n => `${n} заявок подано всього`,
+    statsClaimsBreakdown: (a, r, p) => `${a} прийнято · ${r} відхилено · ${p} на розгляді`,
+    statsClaimsTopCategory: (cat, n) => `Найпопулярніша категорія: ${cat} (${n} разів)`,
+    statsClaimsNone: 'Заявок ще не подавали.',
+    statsSecretCoinTitle: 'Secret Coin',
+    statsSecretCoinGrants: n => `${n} видач Secret Coin`,
+    statsSecretCoinTotal: (n, ce) => `${n} ${ce} видано сумарно`,
+    statsRewardsTitle: 'Reward Shop',
+    statsOrdersTotal: n => `${n} замовлень зроблено`,
+    statsCoinsSpent: (n, ce) => `${n} ${ce} витрачено на призи`,
+    statsTopReward: (name, n) => `Найпопулярніший приз: ${name} (${n} разів)`,
+    statsRewardsNone: 'Ще ніхто нічого не купував.',
+    statsSuggestionsTitle: 'Відгуки',
+    statsSuggestionsTotal: (total, unread) => `${total} відгуків надіслано, ${unread} ще не прочитано`,
+    statsCloseBtn: 'Закрити',
+    showAllBtn: 'Переглянути всю історію',
+    currentBalanceLabel: 'Поточний баланс',
+    suggestionsArchiveBtn: 'Архів',
+    suggestionsArchiveTitle: '📂 Архів прочитаних відгуків',
+    suggestionsArchiveLoading: 'Завантажуємо…',
+    suggestionsArchiveEmpty: 'Архів поки що порожній.',
+    kudosPanelTitle: '💜 Дати Kudos',
+    kudosLeftNote: n => `Залишилось ${n} з 3 цього місяця — згорають в кінці місяця`,
+    kudosToPlaceholder: 'Кому?',
+    kudosMsgPlaceholder: 'За що дякуєте?',
+    kudosSendBtn: 'Надіслати',
+    kudosLimitReached: 'Ліміт вичерпано',
+    kudosSending: 'Надсилаємо…',
+    myKudosTitle: '💜 Моя стрічка Kudos',
+    myKudosSub: 'Ви дали й отримали',
+    kudosSentPrefix: 'Ви подякували',
+    kudosReceivedSuffix: 'подякував(ла) вам',
+    kudosEmpty: 'Поки що немає жодного Kudos.',
+    leaderboardTitle: '🏆 Лідери',
+    leaderboardKudos: 'Топ за Kudos цього місяця',
+    leaderboardCategory: 'Лідери за категоріями цього місяця',
+    leaderboardCategoryNote: 'По одному лідеру на кожну категорію — рахується з 1 числа, скидається щомісяця',
+    leaderboardEmpty: 'Ще немає даних цього місяця.',
+    progressTitle: '🎯 Наступна нагорода',
+    progressNone: 'Усі доступні нагороди вже отримано.',
+    progressToGo: n => `Ще ${n} Коїнів`,
+    historyTitle: '🧾 Історія Коїнів',
+    historyEmpty: 'Транзакцій ще немає.',
+    claimPanelTitle: cn => `📝 Подати заявку на ${cn}`,
+    claimPanelNote: 'Story, LinkedIn, Skill Sharing, дайджест, виступи та інше — після підтвердження HR',
+    claimProofPlaceholder: 'Посилання чи короткий опис-підтвердження',
+    claimSubmitBtn: 'Надіслати',
+    claimSending: 'Надсилаємо…',
+    mySubmissionsTitle: 'Мої заявки',
+    noSubmissions: 'Заявок ще немає.',
+    statusPending: 'На розгляді',
+    statusApproved: 'Прийнято',
+    statusRejected: 'Відхилено',
+    pendingSectionTitle: 'Заявки на розгляді',
+    noPending: 'Немає заявок на розгляді.',
+    approveBtn: 'Прийняти',
+    rejectBtn: 'Відхилити',
+    adminsSectionTitle: 'Адміністратори',
+    ownerLabel: owner => `Власник (завжди адмін): ${owner}`,
+    addAdminPlaceholder: 'email@yourcompany.com',
+    addAdminBtn: 'Додати адміна',
+    removeBtn: 'Прибрати',
+    managersSectionTitle: 'Менеджери',
+    managersSectionNote: 'Мають доступ лише до Secret Coin — не бачать заявки чи адмінку',
+    addManagerPlaceholder: 'email@yourcompany.com',
+    addManagerBtn: 'Додати менеджера',
+    noManagers: 'Ще немає жодного менеджера.',
+    toastManagerAdded: '✅ Менеджера додано',
+    toastManagerRemoved: 'Прибрано з менеджерів',
+    manageRewardsTitle: '🎁 Товари Reward Shop',
+    rewardNamePlaceholder: 'Назва (укр.)',
+    rewardNameEnPlaceholder: 'Назва (англ., опц.)',
+    rewardPricePlaceholder: 'Ціна в Coins',
+    rewardEmojiPlaceholder: 'Емодзі',
+    rewardDescPlaceholder: 'Опис (укр., опц.)',
+    rewardDescEnPlaceholder: 'Опис (англ., опц.)',
+    rewardStockPlaceholder: 'Обмежена кількість (опц.)',
+    addRewardBtn: 'Додати товар',
+    addRewardSending: 'Додаємо…',
+    suggestionsTitle: '💬 Відгуки та пропозиції',
+    suggestionsNote: 'Ідея, зауваження, щось не працює — пишіть сюди, HR це читає',
+    suggestionPlaceholder: 'Ваш відгук чи пропозиція…',
+    suggestionSubmitBtn: 'Надіслати',
+    suggestionSending: 'Надсилаємо…',
+    suggestionsAdminTitle: '💬 Нові відгуки',
+    noSuggestions: 'Немає нових відгуків.',
+    suggestionMarkReadBtn: 'Прочитано',
+    toastSuggestionEmpty: 'Напишіть щось перед відправкою',
+    toastSuggestionSent: '💬 Дякуємо за відгук!',
+    toastSuggestionRead: 'Позначено прочитаним',
+    secretCoinTitle: '🪙 Secret Coin',
+    secretCoinNote: 'не 2 квартали підряд тій самій людині',
+    secretCoinRemaining: (left, ce) => `залишилось ${left} ${ce} з 100 цього кварталу`,
+    secretCoinRecipientPlaceholder: 'Отримувач…',
+    secretCoinCoinsPlaceholder: 'Coins',
+    secretCoinReasonPlaceholder: 'За що саме?',
+    secretCoinSubmitBtn: 'Видати Secret Coin',
+    secretCoinSending: 'Видаємо…',
+    secretCoinHint: 'Треба поділити між двома людьми? Видайте двічі — ліміт рахується сумарно за квартал.',
+    rewardShopTitle: 'Reward Shop',
+    rewardShopSub: cn => `Обміняй ${cn} на подарунки`,
+    rewardSoldOut: 'Немає в наявності',
+    rewardOwned: 'Отримано ✓',
+    rewardBuyBtn: 'Купити',
+    rewardNeedMore: (n, ce) => `Ще ${n} ${ce}`,
+    rewardRemaining: n => `Залишилось ${n}`,
+    rewardAllSoldOut: 'Розібрали все',
+    confirmCancel: 'Скасувати',
+    confirmSubmit: 'Підтвердити замовлення',
+    confirmProcessing: 'Обробляємо…',
+    confirmFromBalance: ce => `${ce} з вашого балансу`,
+    successTitle: 'Дякуємо! Замовлення надіслано',
+    successSub: name => `«${name}» — HR побачить це в списку замовлень і зв'яжеться з вами.`,
+    successClose: 'Зрозуміло',
+    toastKudosChoose: 'Оберіть колегу зі списку',
+    toastKudosReason: 'Напишіть, за що саме — це обов\u2019язково',
+    toastKudosSent: '💜 Kudos надіслано — колега побачить це в стрічці',
+    toastClaimProof: 'Додайте опис/посилання-підтвердження',
+    toastClaimSent: '📝 Заявку надіслано на розгляд HR',
+    toastApproved: '✅ Заявку прийнято',
+    toastRejected: '🚫 Заявку відхилено',
+    toastAdminAdded: '✅ Адміна додано',
+    toastAdminRemoved: 'Прибрано з адмінів',
+    toastRewardNeedName: 'Вкажіть назву й ціну товару',
+    toastRewardAdded: '🎁 Товар додано в Reward Shop',
+    toastRewardRemoved: 'Товар прибрано з Reward Shop',
+    toastAdminEnterEmail: 'Введіть email',
+    toastSkChoose: 'Оберіть отримувача і суму',
+    toastSkReason: 'Вкажіть причину',
+    toastScSent: '🪙 Secret Coin видано',
+    toastBought: '🎉 Обміняно!',
+    catGroupBase: '🌱 Базові активності',
+    achievementsSub: 'Бейджі за активність на платформі',
+    achievementsEarnedOn: date => `Отримано ${date}`,
+    achievementsLocked: 'Ще не відкрито',
+    achTeaserTitle: '🏅 Найближчі ачівки',
+    manageCampaignTitle: '🎯 Кампанійні активності',
+    manageCampaignNote: 'Тимчасові активності (маркетинг, HR тощо) — додавайте й прибирайте без правок коду',
+    campaignGroupPlaceholder: 'Назва групи (напр. Маркетинг)',
+    campaignTitlePlaceholder: 'Назва активності',
+    campaignCoinsPlaceholder: 'Coins',
+    campaignProofPlaceholder: 'Підказка щодо підтвердження (опц.)',
+    addCampaignBtn: 'Додати активність',
+    addCampaignSending: 'Додаємо…',
+    toastCampaignNeedFields: 'Вкажіть групу, назву і ціну',
+    toastCampaignAdded: '🎯 Активність додано',
+    toastCampaignRemoved: 'Активність прибрано',
+    noCampaignCategories: 'Поки немає кампанійних активностей.',
+  },
+  en: {
+    loading: 'Loading your balance…',
+    admin: 'Admin',
+    managerBadge: 'Manager',
+    navHome: 'My dashboard',
+    navKudos: 'Give Kudos',
+    navClaim: 'Submit a claim',
+    navShop: 'Reward Shop',
+    navLeaders: 'Leaders',
+    navAchievements: 'Achievements',
+    navFeedback: 'Feedback',
+    navPending: 'Claims to review',
+    navSecretCoin: 'Secret Coin',
+    navStats: 'Statistics',
+    navPeople: 'Admins & managers',
+    navShopAdmin: 'Reward Shop items',
+    navCampaignAdmin: 'Campaign activities',
+    navSuggestionsAdmin: 'New feedback',
+    adminSectionLabel: 'Admin',
+    homeGreeting: name => `Hi, ${name} 👋`,
+    homeSub: 'Updated just now · showing only your records',
+    statBalance: 'Balance',
+    statKudosLeft: 'Kudos left',
+    statPending: 'Claims pending',
+    tableAll: 'All my records',
+    tableApprovedOnly: 'Approved only',
+    colType: 'Type',
+    colCategory: 'Category',
+    colCoins: 'Coins',
+    colStatus: 'Status',
+    rowKudosReceived: 'Kudos received',
+    rowClaim: 'Claim',
+    rowOrder: 'Order',
+    myRecordsEmpty: 'No records yet.',
+    statsModalTitle: '📊 Platform statistics',
+    statsLoading: 'Crunching numbers…',
+    statsEngagementTitle: 'Engagement',
+    statsTotalUsers: n => `${n} registered users`,
+    statsTotalCoinsHeld: (n, ce) => `${n} ${ce} currently held on balances (unspent)`,
+    statsKudosTitle: 'Kudos',
+    statsKudosGiven: n => `${n} Kudos sent in total`,
+    statsKudosGivers: n => `${n} people have given at least 1 Kudos`,
+    statsKudosReceivers: n => `${n} people have received at least 1 Kudos`,
+    statsClaimsTitle: 'Coins claims',
+    statsClaimsTotal: n => `${n} claims submitted in total`,
+    statsClaimsBreakdown: (a, r, p) => `${a} approved · ${r} rejected · ${p} pending`,
+    statsClaimsTopCategory: (cat, n) => `Most popular category: ${cat} (${n} times)`,
+    statsClaimsNone: 'No claims submitted yet.',
+    statsSecretCoinTitle: 'Secret Coin',
+    statsSecretCoinGrants: n => `${n} Secret Coin grants`,
+    statsSecretCoinTotal: (n, ce) => `${n} ${ce} granted in total`,
+    statsRewardsTitle: 'Reward Shop',
+    statsOrdersTotal: n => `${n} orders placed`,
+    statsCoinsSpent: (n, ce) => `${n} ${ce} spent on rewards`,
+    statsTopReward: (name, n) => `Most popular reward: ${name} (${n} times)`,
+    statsRewardsNone: 'No purchases yet.',
+    statsSuggestionsTitle: 'Feedback',
+    statsSuggestionsTotal: (total, unread) => `${total} feedback submitted, ${unread} still unread`,
+    statsCloseBtn: 'Close',
+    showAllBtn: 'View full history',
+    currentBalanceLabel: 'Current balance',
+    suggestionsArchiveBtn: 'Archive',
+    suggestionsArchiveTitle: '📂 Archive of read feedback',
+    suggestionsArchiveLoading: 'Loading…',
+    suggestionsArchiveEmpty: 'Archive is empty so far.',
+    kudosPanelTitle: '💜 Give Kudos',
+    kudosLeftNote: n => `${n} of 3 left this month — expire at month end`,
+    kudosToPlaceholder: 'To whom?',
+    kudosMsgPlaceholder: 'What for?',
+    kudosSendBtn: 'Send',
+    kudosLimitReached: 'Limit reached',
+    kudosSending: 'Sending…',
+    myKudosTitle: '💜 My Kudos feed',
+    myKudosSub: 'Given and received',
+    kudosSentPrefix: 'You thanked',
+    kudosReceivedSuffix: 'thanked you',
+    kudosEmpty: 'No Kudos yet.',
+    leaderboardTitle: '🏆 Leaders',
+    leaderboardKudos: 'Top Kudos this month',
+    leaderboardCategory: 'Category leaders this month',
+    leaderboardCategoryNote: 'One leader per category — counted from the 1st, resets every month',
+    leaderboardEmpty: 'No data yet this month.',
+    progressTitle: '🎯 Next reward',
+    progressNone: 'You have claimed all available rewards.',
+    progressToGo: n => `${n} Coins to go`,
+    historyTitle: '🧾 Coins history',
+    historyEmpty: 'No transactions yet.',
+    claimPanelTitle: cn => `📝 Submit a claim for ${cn}`,
+    claimPanelNote: 'Story, LinkedIn, Skill Sharing, digest, talks and more — after HR approval',
+    claimProofPlaceholder: 'Link or a short description as proof',
+    claimSubmitBtn: 'Send',
+    claimSending: 'Sending…',
+    mySubmissionsTitle: 'My claims',
+    noSubmissions: 'No claims yet.',
+    statusPending: 'Pending',
+    statusApproved: 'Approved',
+    statusRejected: 'Rejected',
+    pendingSectionTitle: 'Claims to review',
+    noPending: 'No claims pending review.',
+    approveBtn: 'Approve',
+    rejectBtn: 'Reject',
+    adminsSectionTitle: 'Admins',
+    ownerLabel: owner => `Owner (always admin): ${owner}`,
+    addAdminPlaceholder: 'email@yourcompany.com',
+    addAdminBtn: 'Add admin',
+    removeBtn: 'Remove',
+    managersSectionTitle: 'Managers',
+    managersSectionNote: 'Have access only to Secret Coin — do not see claims or admin tools',
+    addManagerPlaceholder: 'email@yourcompany.com',
+    addManagerBtn: 'Add manager',
+    noManagers: 'No managers yet.',
+    toastManagerAdded: '✅ Manager added',
+    toastManagerRemoved: 'Removed from managers',
+    manageRewardsTitle: '🎁 Reward Shop items',
+    rewardNamePlaceholder: 'Name (UA)',
+    rewardNameEnPlaceholder: 'Name (EN, optional)',
+    rewardPricePlaceholder: 'Price in Coins',
+    rewardEmojiPlaceholder: 'Emoji',
+    rewardDescPlaceholder: 'Description (UA, optional)',
+    rewardDescEnPlaceholder: 'Description (EN, optional)',
+    rewardStockPlaceholder: 'Limited quantity (optional)',
+    addRewardBtn: 'Add item',
+    addRewardSending: 'Adding…',
+    suggestionsTitle: '💬 Feedback & suggestions',
+    suggestionsNote: 'An idea, a note, something not working — write here, HR reads it',
+    suggestionPlaceholder: 'Your feedback or suggestion…',
+    suggestionSubmitBtn: 'Send',
+    suggestionSending: 'Sending…',
+    suggestionsAdminTitle: '💬 New feedback',
+    noSuggestions: 'No new feedback.',
+    suggestionMarkReadBtn: 'Mark read',
+    toastSuggestionEmpty: 'Write something before sending',
+    toastSuggestionSent: '💬 Thanks for the feedback!',
+    toastSuggestionRead: 'Marked as read',
+    secretCoinTitle: '🪙 Secret Coin',
+    secretCoinNote: 'not the same person 2 quarters in a row',
+    secretCoinRemaining: (left, ce) => `${left} ${ce} of 100 left this quarter`,
+    secretCoinRecipientPlaceholder: 'Recipient…',
+    secretCoinCoinsPlaceholder: 'Coins',
+    secretCoinReasonPlaceholder: 'What for?',
+    secretCoinSubmitBtn: 'Grant Secret Coin',
+    secretCoinSending: 'Granting…',
+    secretCoinHint: 'Need to split between two people? Grant twice — the quarterly limit is cumulative.',
+    rewardShopTitle: 'Reward Shop',
+    rewardShopSub: cn => `Exchange ${cn} for rewards`,
+    rewardSoldOut: 'Out of stock',
+    rewardOwned: 'Claimed ✓',
+    rewardBuyBtn: 'Buy',
+    rewardNeedMore: (n, ce) => `${n} ${ce} more`,
+    rewardRemaining: n => `${n} left`,
+    rewardAllSoldOut: 'All claimed',
+    confirmCancel: 'Cancel',
+    confirmSubmit: 'Confirm order',
+    confirmProcessing: 'Processing…',
+    confirmFromBalance: ce => `${ce} from your balance`,
+    successTitle: 'Thank you! Order submitted',
+    successSub: name => `"${name}" — HR will see this in the order list and reach out to you.`,
+    successClose: 'Got it',
+    toastKudosChoose: 'Choose a colleague from the list',
+    toastKudosReason: 'Write what it\u2019s for — this is required',
+    toastKudosSent: '💜 Kudos sent — your colleague will see it in the feed',
+    toastClaimProof: 'Add a description/link as proof',
+    toastClaimSent: '📝 Claim submitted for HR review',
+    toastApproved: '✅ Claim approved',
+    toastRejected: '🚫 Claim rejected',
+    toastAdminAdded: '✅ Admin added',
+    toastAdminRemoved: 'Removed from admins',
+    toastRewardNeedName: 'Enter a name and price',
+    toastRewardAdded: '🎁 Item added to Reward Shop',
+    toastRewardRemoved: 'Item removed from Reward Shop',
+    toastAdminEnterEmail: 'Enter an email',
+    toastSkChoose: 'Choose a recipient and amount',
+    toastSkReason: 'Enter a reason',
+    toastScSent: '🪙 Secret Coin granted',
+    toastBought: '🎉 Redeemed!',
+    catGroupBase: '🌱 Base activities',
+    achievementsSub: 'Badges for activity on the platform',
+    achievementsEarnedOn: date => `Earned ${date}`,
+    achievementsLocked: 'Not unlocked yet',
+    achTeaserTitle: '🏅 Achievements within reach',
+    manageCampaignTitle: '🎯 Campaign activities',
+    manageCampaignNote: 'Temporary activities (marketing, HR, etc.) — add and remove without code changes',
+    campaignGroupPlaceholder: 'Group name (e.g. Marketing)',
+    campaignTitlePlaceholder: 'Activity name',
+    campaignCoinsPlaceholder: 'Coins',
+    campaignProofPlaceholder: 'Proof hint (optional)',
+    addCampaignBtn: 'Add activity',
+    addCampaignSending: 'Adding…',
+    toastCampaignNeedFields: 'Enter group, name and price',
+    toastCampaignAdded: '🎯 Activity added',
+    toastCampaignRemoved: 'Activity removed',
+    noCampaignCategories: 'No campaign activities yet.',
+  },
+};
+function t(key){ return T[currentLang][key]; }
+
+const ERR = {
+  ua: {
+    NO_IDENTITY: 'Не вдалося визначити ваш Google-акаунт. Переконайтесь, що ви увійшли під робочим акаунтом компанії, і відкрийте посилання ще раз.',
+    WRONG_DOMAIN: 'Ця платформа доступна лише для акаунтів компанії.',
+    NO_RECIPIENT: 'Вкажіть колегу зі списку.',
+    SELF_KUDOS: 'Не можна дарувати Kudos собі.',
+    RECIPIENT_NOT_FOUND: 'Цей колега ще не відкривав платформу — попросіть його зайти хоча б раз.',
+    KUDOS_LIMIT: 'Ліміт Kudos на цей місяць вичерпано.',
+    MESSAGE_REQUIRED: 'Напишіть, за що саме — це обов\u2019язково.',
+    ALREADY_OWNED: 'Ви вже отримали цей приз.',
+    SOLD_OUT: 'Товар закінчився.',
+    INSUFFICIENT_BALANCE: 'Недостатньо Коїнів.',
+    UNKNOWN_REWARD: 'Невідомий приз.',
+    UNKNOWN_CATEGORY: 'Невідома категорія.',
+    CATEGORY_ALREADY_DONE: 'Цю категорію можна подати лише один раз, і ви вже це зробили.',
+    PROOF_REQUIRED: 'Додайте короткий опис/посилання-підтвердження.',
+    CATEGORY_LIMIT: (period) => 'Ліміт для цієї категорії на ' + (period === 'week' ? 'цей тиждень' : 'цей місяць') + ' вичерпано.',
+    SOCIAL_CAP: (cap) => `Місячний ліміт на соцмережі (${cap} ${state.currencyEmoji}) буде перевищено.`,
+    ADMIN_ONLY_REVIEW: 'Лише адміністратори можуть підтверджувати заявки.',
+    UNKNOWN_DECISION: 'Невідоме рішення.',
+    SUBMISSION_NOT_FOUND: 'Заявку не знайдено.',
+    ALREADY_REVIEWED: 'Цю заявку вже розглянуто.',
+    ADMIN_ONLY_ADD: 'Лише адміністратори можуть додавати інших адмінів.',
+    ADMIN_ONLY_REWARDS: 'Лише адміністратори можуть керувати товарами Reward Shop.',
+    ADMIN_ONLY_CAMPAIGN: 'Лише адміністратори можуть керувати кампанійними активностями.',
+    REWARD_NAME_REQUIRED: 'Вкажіть назву товару.',
+    REWARD_PRICE_INVALID: 'Ціна має бути додатним числом.',
+    CAMPAIGN_FIELDS_REQUIRED: 'Вкажіть групу, назву і ціну активності.',
+    CAMPAIGN_PRICE_INVALID: 'Ціна має бути додатним числом.',
+    UNKNOWN_CAMPAIGN_CATEGORY: 'Цю активність вже прибрано.',
+    EMAIL_DOMAIN: (domain) => `Email має бути в домені @${domain}.`,
+    ALREADY_ADMIN: 'Ця людина вже адміністратор.',
+    ALREADY_MANAGER: 'Ця людина вже менеджер.',
+    UNKNOWN_MANAGER: 'Такого менеджера не знайдено.',
+    SUGGESTION_TEXT_REQUIRED: 'Напишіть текст перед відправкою.',
+    SUGGESTION_NOT_FOUND: 'Відгук не знайдено.',
+    ADMIN_ONLY_MANAGE: 'Лише адміністратори можуть керувати списком адмінів.',
+    CANNOT_REMOVE_OWNER: 'Неможливо видалити основного власника платформи.',
+    ADMIN_ONLY_SC: 'Лише адміністратори або менеджери можуть видавати Secret Coin.',
+    SK_RECIPIENT_COUNT: 'Оберіть 1 або 2 отримувачів.',
+    SC_TOTAL_RANGE: 'Сума Secret Coin має бути від 1 до 100 сумарно.',
+    RECIPIENT_DOMAIN: (domain) => `Отримувач має бути з домену @${domain}.`,
+    SC_CONSECUTIVE_QUARTER: (name) => `${name} вже отримував(ла) Secret Coin минулого кварталу — не можна 2 квартали підряд.`,
+    SC_ALREADY_THIS_QUARTER: (name) => `${name} вже отримував(ла) Secret Coin цього кварталу.`,
+    SC_QUARTER_BUDGET: (granted, remaining) => `Квартальний бюджет Secret Coin — 100 ${state.currencyEmoji} сумарно. Вже видано ${granted}, залишилось ${remaining}.`,
+  },
+  en: {
+    NO_IDENTITY: "We can't find your Google account. Please make sure you are logged in with your work account, then open the link again.",
+    WRONG_DOMAIN: 'This platform is only for company accounts.',
+    NO_RECIPIENT: 'Please choose a colleague from the list.',
+    SELF_KUDOS: "You can't give Kudos to yourself.",
+    RECIPIENT_NOT_FOUND: "This colleague hasn't opened the platform yet. Ask them to open it once, then try again.",
+    KUDOS_LIMIT: 'You have no Kudos left this month.',
+    MESSAGE_REQUIRED: 'Please write what it is for. This is required.',
+    ALREADY_OWNED: 'You already got this reward.',
+    SOLD_OUT: 'This item is out of stock.',
+    INSUFFICIENT_BALANCE: 'You do not have enough Coins.',
+    UNKNOWN_REWARD: 'This reward does not exist.',
+    UNKNOWN_CATEGORY: 'This category does not exist.',
+    CATEGORY_ALREADY_DONE: 'This category can only be submitted once, and you already have.',
+    PROOF_REQUIRED: 'Please add a short description or link as proof.',
+    CATEGORY_LIMIT: (period) => `You reached the limit for this category ${period === 'week' ? 'this week' : 'this month'}.`,
+    SOCIAL_CAP: (cap) => `This would go over the monthly social media limit (${cap} ${state.currencyEmoji}).`,
+    ADMIN_ONLY_REVIEW: 'Only admins can approve or reject claims.',
+    UNKNOWN_DECISION: 'Unknown decision.',
+    SUBMISSION_NOT_FOUND: 'We could not find this claim.',
+    ALREADY_REVIEWED: 'This claim was already reviewed.',
+    ADMIN_ONLY_ADD: 'Only admins can add other admins.',
+    ADMIN_ONLY_REWARDS: 'Only admins can manage Reward Shop items.',
+    ADMIN_ONLY_CAMPAIGN: 'Only admins can manage campaign activities.',
+    REWARD_NAME_REQUIRED: 'Please enter an item name.',
+    REWARD_PRICE_INVALID: 'Price must be a positive number.',
+    CAMPAIGN_FIELDS_REQUIRED: 'Enter a group, name and price for the activity.',
+    CAMPAIGN_PRICE_INVALID: 'Price must be a positive number.',
+    UNKNOWN_CAMPAIGN_CATEGORY: 'This activity was already removed.',
+    EMAIL_DOMAIN: (domain) => `The email must be from @${domain}.`,
+    ALREADY_ADMIN: 'This person is already an admin.',
+    ALREADY_MANAGER: 'This person is already a manager.',
+    UNKNOWN_MANAGER: 'This manager was not found.',
+    SUGGESTION_TEXT_REQUIRED: 'Please write something before sending.',
+    SUGGESTION_NOT_FOUND: 'This feedback was not found.',
+    ADMIN_ONLY_MANAGE: 'Only admins can manage the admin list.',
+    CANNOT_REMOVE_OWNER: 'You cannot remove the platform owner.',
+    ADMIN_ONLY_SC: 'Only admins or managers can grant Secret Coin.',
+    SK_RECIPIENT_COUNT: 'Please choose 1 or 2 recipients.',
+    SC_TOTAL_RANGE: 'The Secret Coin total must be between 1 and 100.',
+    RECIPIENT_DOMAIN: (domain) => `The recipient must have an @${domain} email.`,
+    SC_CONSECUTIVE_QUARTER: (name) => `${name} already got Secret Coin last quarter. Not allowed 2 quarters in a row.`,
+    SC_ALREADY_THIS_QUARTER: (name) => `${name} already got Secret Coin this quarter.`,
+    SC_QUARTER_BUDGET: (granted, remaining) => `The quarterly Secret Coin budget is 100 ${state.currencyEmoji}. Already given: ${granted}. Left: ${remaining}.`,
+  },
+};
+
+function translateError_(raw){
+  if (!raw) return raw;
+  const cleaned = String(raw).replace(/^Error:\s*/i, '').trim();
+  const parts = cleaned.split('|');
+  const code = parts[0];
+  const params = parts.slice(1);
+  const dict = ERR[currentLang] || ERR.ua;
+  const entry = dict[code];
+  if (!entry) {
+    return currentLang === 'en'
+      ? 'Something went wrong. Please try again, or contact HR if it keeps happening.'
+      : 'Щось пішло не так. Спробуйте ще раз, або зверніться до HR, якщо це повторюється.';
+  }
+  return typeof entry === 'function' ? entry.apply(null, params) : entry;
+}
+
+function setLang(lang){
+  currentLang = lang;
+  try { localStorage.setItem('teamcoins_lang', lang); } catch(e){}
+  render();
+}
+
+function showToast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=> el.classList.remove('show'), 5000);
+}
+function escapeHtml(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function fmt(n){ return Number(n).toLocaleString(currentLang === 'en' ? 'en-US' : 'uk-UA'); }
+function statusBadge(status){
+  if (status === 'Approved') return `<span class="badge approved">${t('statusApproved')}</span>`;
+  if (status === 'Rejected') return `<span class="badge rejected">${t('statusRejected')}</span>`;
+  return `<span class="badge pending">${t('statusPending')}</span>`;
+}
+function catLabel(c){ return currentLang === 'en' && c.labelEn ? c.labelEn : c.label; }
+function stripLeadingEmoji_(s){ const i = s.indexOf(' '); return i === -1 ? s : s.slice(i + 1); }
+function catProofHint(c){ return currentLang === 'en' && c.proofHintEn ? c.proofHintEn : c.proofHint; }
+function rewardName(r){ return currentLang === 'en' && r.nameEn ? r.nameEn : r.name; }
+function rewardDesc(r){ return currentLang === 'en' && r.descEn ? r.descEn : r.desc; }
+function campaignGroupLabel(g){ return currentLang === 'en' && g.groupEn ? g.groupEn : g.group; }
+function campaignTitle(c){ return currentLang === 'en' && c.titleEn ? c.titleEn : c.title; }
+function campaignProofHint(c){ return currentLang === 'en' && c.proofHintEn ? c.proofHintEn : (c.proofHint || ''); }
+function achievementLabel(a){ return currentLang === 'en' && a.labelEn ? a.labelEn : a.label; }
+function achievementDesc(a){ return currentLang === 'en' && a.descEn ? a.descEn : a.desc; }
+
+function groupCampaignCategories_(list){
+  const order = [];
+  const byGroup = {};
+  (list || []).forEach(c => {
+    if (!byGroup[c.groupId]) {
+      byGroup[c.groupId] = { groupId: c.groupId, group: c.group, groupEn: c.groupEn, items: [] };
+      order.push(c.groupId);
+    }
+    byGroup[c.groupId].items.push(c);
+  });
+  return order.map(id => byGroup[id]);
+}
+
+// JS-порт groupIdFromText_ з Code.gs.
+function groupIdFromText_(text){
+  const base = String(text || '').trim().toLowerCase().replace(/[^a-z0-9а-яіїєґ]+/gi, '-').replace(/^-+|-+$/g, '');
+  return base || 'group';
+}
+
+// Об'єднує кампанійні групи з базовими категоріями, які мають displayGroup.
+function buildDisplayGroups_(earnCategories, campaignCategories){
+  const groups = groupCampaignCategories_(campaignCategories);
+  (earnCategories || []).filter(c => c.displayGroup).forEach(c => {
+    const gid = groupIdFromText_(c.displayGroup);
+    let grp = groups.find(g => g.groupId === gid);
+    if (!grp) { grp = { groupId: gid, group: c.displayGroup, groupEn: c.displayGroupEn || c.displayGroup, items: [] }; groups.push(grp); }
+    grp.items.push({
+      id: c.id, coins: c.coins, __base: true,
+      title: stripLeadingEmoji_(catLabel(c)), titleEn: c.labelEn ? stripLeadingEmoji_(c.labelEn) : undefined,
+      proofHint: c.proofHint, proofHintEn: c.proofHintEn,
+    });
+  });
+  return groups;
+}
+
+function findSelectedCategory_(id){
+  const base = (state.earnCategories || []).find(c => c.id === id);
+  if (base) return Object.assign({ __base: true }, base);
+  const campaign = (state.campaignCategories || []).find(c => c.id === id);
+  if (campaign) return Object.assign({ __base: false }, campaign);
+  return null;
+}
+
+// ============================================================
+// SIDEBAR
+// ============================================================
+function renderSidebar_(){
+  const navItemHtml_ = (item) => {
+    const badgeVal = item.badge ? item.badge(state) : 0;
+    return `
+      <div class="sidebar-item ${currentPage === item.id ? 'active' : ''}" onclick="setPage('${item.id}')">
+        <span class="ic">${item.icon}</span><span class="lbl">${escapeHtml(t(item.labelKey))}</span>
+        ${badgeVal ? `<span class="sidebar-badge">${badgeVal}</span>` : ''}
+      </div>`;
+  };
+  const mainItemsHtml = NAV_ITEMS.map(navItemHtml_).join('');
+  const visibleAdminItems = ADMIN_NAV_ITEMS.filter(item => item.visible(state));
+  const adminItemsHtml = visibleAdminItems.length
+    ? `<div class="sidebar-divider"></div><div class="sidebar-section-label">${escapeHtml(t('adminSectionLabel'))}</div>${visibleAdminItems.map(navItemHtml_).join('')}`
+    : '';
+
+  return `
+    <div class="sidebar">
+      <div class="sidebar-brand">${escapeHtml(state.currencyEmoji)} ${escapeHtml(state.currencyName)}</div>
+      <div class="sidebar-brand who" style="margin-top:-14px;">${escapeHtml(state.name)}</div>
+      ${mainItemsHtml}
+      ${adminItemsHtml}
+    </div>
+  `;
+}
+
+function renderContentHeader_(titleKey){
+  const CE = state.currencyEmoji;
+  return `
+    <div class="content-header">
+      <div class="content-title">${escapeHtml(t(titleKey))}</div>
+      <div class="content-header-right">
+        <div class="lang-toggle">
+          <button class="lang-btn ${currentLang === 'ua' ? 'active' : ''}" onclick="setLang('ua')">UA</button>
+          <button class="lang-btn ${currentLang === 'en' ? 'active' : ''}" onclick="setLang('en')">EN</button>
+        </div>
+        <div class="pill coins" onclick="setPage('home')" style="cursor:pointer;">${CE} ${fmt(state.balance)}</div>
+        <div class="pill kudos">💜 ${state.kudosLeft}</div>
+        ${state.isAdmin ? `<div class="pill admin">🛠️ ${t('admin')}</div>` : (state.isManager ? `<div class="pill admin">🧑‍💼 ${t('managerBadge')}</div>` : '')}
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// PAGE: 🏠 Мій кабінет
+// ============================================================
+function renderPageHome_(){
+  const CE = state.currencyEmoji;
+  const nextReward = state.rewards.filter(r => !r.soldOut && !state.owned.includes(r.id) && r.price > state.balance).sort((a,b)=>a.price-b.price)[0];
+  const progressHtml = nextReward ? (() => {
+    const pct = Math.max(0, Math.min(100, Math.round((state.balance / nextReward.price) * 100)));
+    return `<div class="progress-panel">
+      <div class="progress-head"><div class="progress-title">${t('progressTitle')} · ${escapeHtml(rewardName(nextReward))}</div><div class="progress-value">${fmt(state.balance)} / ${fmt(nextReward.price)} ${CE}</div></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-note">${t('progressToGo')(fmt(nextReward.price - state.balance))}</div>
+    </div>`;
+  })() : `<div class="progress-panel"><div class="progress-title">${t('progressTitle')}</div><div class="progress-note">${t('progressNone')}</div></div>`;
+
+  const records = [];
+  state.myFeed.filter(k => k.direction === 'received').forEach(k => records.push({ type:'kudos', label: k.withName, coins: 10, status: 'Approved' }));
+  state.mySubmissions.forEach(s => records.push({ type:'claim', label: stripLeadingEmoji_(currentLang === 'en' && s.categoryLabelEn ? s.categoryLabelEn : s.categoryLabel), coins: s.coins, status: s.status }));
+  const filteredRecords = myRecordsFilter === 'approved' ? records.filter(r => r.status === 'Approved') : records;
+
+  const recordsRowsHtml = filteredRecords.length ? filteredRecords.map(r => `
+    <tr>
+      <td style="padding:9px 0; border-bottom:1px solid var(--card-border); font-size:12.5px;">${r.type==='kudos' ? t('rowKudosReceived') : t('rowClaim')}</td>
+      <td style="padding:9px 0; border-bottom:1px solid var(--card-border); font-size:12.5px; font-weight:600;">${escapeHtml(r.label)}</td>
+      <td style="padding:9px 0; border-bottom:1px solid var(--card-border); font-size:12.5px; color:var(--gold); font-weight:700;">+${r.coins} ${CE}</td>
+      <td style="padding:9px 0; border-bottom:1px solid var(--card-border);">${statusBadge(r.status)}</td>
+    </tr>`).join('') : `<tr><td colspan="4" style="padding:16px 0;"><div class="hint">${t('myRecordsEmpty')}</div></td></tr>`;
+
+  return `
+    ${renderContentHeader_('navHome')}
+    <div style="font-size:20px; font-weight:800; margin-bottom:4px;">${t('homeGreeting')(escapeHtml(state.name.split(' ')[0] || state.name))}</div>
+    <div class="section-sub">${t('homeSub')}</div>
+
+    <div class="stat-cards">
+      <div class="stat-card"><div class="lbl">${t('statBalance')}</div><div class="val">${CE} ${fmt(state.balance)}</div></div>
+      <div class="stat-card"><div class="lbl">${t('statKudosLeft')}</div><div class="val">${state.kudosLeft} / 3</div></div>
+      <div class="stat-card"><div class="lbl">${t('statPending')}</div><div class="val">${state.mySubmissions.filter(s=>s.status==='Pending').length}</div></div>
+    </div>
+
+    ${progressHtml}
+
+    ${renderAchievementTeasers_()}
+
+    <div class="table-tabs">
+      <div class="table-tab ${myRecordsFilter==='all'?'active':''}" onclick="setMyRecordsFilter_('all')">${t('tableAll')}</div>
+      <div class="table-tab ${myRecordsFilter==='approved'?'active':''}" onclick="setMyRecordsFilter_('approved')">${t('tableApprovedOnly')}</div>
+    </div>
+    <table style="width:100%; border-collapse:collapse;">
+      <thead><tr>
+        <th style="text-align:left; font-size:11px; color:var(--text-faint); padding-bottom:8px;">${t('colType')}</th>
+        <th style="text-align:left; font-size:11px; color:var(--text-faint); padding-bottom:8px;">${t('colCategory')}</th>
+        <th style="text-align:left; font-size:11px; color:var(--text-faint); padding-bottom:8px;">${t('colCoins')}</th>
+        <th style="text-align:left; font-size:11px; color:var(--text-faint); padding-bottom:8px;">${t('colStatus')}</th>
+      </tr></thead>
+      <tbody>${recordsRowsHtml}</tbody>
+    </table>
+
+    <div class="section-title">${t('historyTitle')}</div>
+    <div class="panel" style="margin-top:0;">
+      <div class="history">${state.ledger.length ? state.ledger.map(x => {
+        const isEarn = x.type === 'EARN';
+        const sign = isEarn ? '+' : '−';
+        return `<div class="history-item"><div class="history-main"><b>${escapeHtml(x.source)}</b><span class="history-source">${escapeHtml(x.reference || '')}</span></div><div class="history-amount ${isEarn ? 'earn' : 'spend'}">${sign}${fmt(x.amount)} ${CE}</div></div>`;
+      }).join('') : `<div class="hint">${t('historyEmpty')}</div>`}</div>
+    </div>
+  `;
+}
+function setMyRecordsFilter_(f){ myRecordsFilter = f; render(); }
+
+// Компактні картки неотриманих ачівок на головній. "Незамінний" сюди не
+// потрапляє: він залежить від рішення менеджера, а не від дій самої людини.
+function renderAchievementTeasers_(){
+  const notEarned = (state.achievements || []).filter(a => !a.earned && a.id !== 'start' && a.id !== 'secret_coin_irreplaceable');
+  if (!notEarned.length) return '';
+  const sorted = notEarned.slice().sort((a, b) => {
+    const pa = a.progress ? a.progress.current / a.progress.target : 0;
+    const pb = b.progress ? b.progress.current / b.progress.target : 0;
+    return pb - pa;
+  });
+
+  const cardsHtml = sorted.map(a => {
+    const cur = a.progress ? a.progress.current : 0;
+    const tgt = a.progress ? a.progress.target : 1;
+    const pct = Math.max(0, Math.min(100, Math.round((cur / tgt) * 100)));
+    const expanded = expandedAchievementId === a.id;
+    const tasksHtml = a.tasks ? a.tasks.map(task => `
+      <div class="ach-task-row ${task.done ? 'done' : ''}">
+        <span class="chk">${task.done ? '✓' : ''}</span>
+        <span class="lbl">${escapeHtml(currentLang === 'en' && task.labelEn ? task.labelEn : task.label)}</span>
+        <span class="amt">+${task.coins} ${state.currencyEmoji}</span>
+      </div>`).join('') : `<div class="hint" style="margin:0;">${escapeHtml(achievementDesc(a))}</div>`;
+
+    return `
+      <div class="ach-teaser ${expanded ? 'expanded' : ''}" onclick="toggleAchievementTeaser_('${a.id}')">
+        <div class="ach-teaser-head">
+          <div class="ach-teaser-emoji">${a.emoji}</div>
+          <div class="ach-teaser-body">
+            <div class="ach-teaser-title">${escapeHtml(achievementLabel(a))} <span class="ach-teaser-frac">${cur} / ${tgt}</span></div>
+            <div class="ach-teaser-track"><div class="ach-teaser-fill" style="width:${pct}%"></div></div>
+          </div>
+          <div class="ach-teaser-chevron">▶</div>
+        </div>
+        <div class="ach-teaser-tasks">${tasksHtml}</div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="section-title" style="margin-top:0;">${t('achTeaserTitle')}</div>
+    ${cardsHtml}
+  `;
+}
+
+// ============================================================
+// PAGE: 💜 Дати Kudos
+// ============================================================
+function renderPageKudos_(){
+  const feedItemHtml_ = k => {
+    if (k.direction === 'sent') {
+      return `<div class="feed-item sent">💜 ${t('kudosSentPrefix')} <b>${escapeHtml(k.withName)}</b> — ${escapeHtml(k.msg)}</div>`;
+    }
+    return `<div class="feed-item received">💜 <b>${escapeHtml(k.withName)}</b> ${t('kudosReceivedSuffix')} — ${escapeHtml(k.msg)}</div>`;
+  };
+  const feedHtml = state.myFeed.length ? state.myFeed.map(feedItemHtml_).join('') : `<div class="hint">${t('kudosEmpty')}</div>`;
+
+  return `
+    ${renderContentHeader_('navKudos')}
+    <div class="panel kudos-panel">
+      <div class="panel-title">${t('kudosPanelTitle')}</div>
+      <div class="panel-note">${t('kudosLeftNote')(state.kudosLeft)}</div>
+      <div class="form-row">
+        <div class="combo-wrap">
+          <input type="text" id="kudos-to-search" class="combo-input" placeholder="${t('kudosToPlaceholder')}" autocomplete="off" oninput="onComboInput_('kudos-to')" onfocus="onComboFocus_('kudos-to')" ${state.kudosLeft <= 0 ? 'disabled' : ''}>
+          <input type="hidden" id="kudos-to" value="">
+          <div class="combo-dropdown" id="kudos-to-dropdown"></div>
+        </div>
+        <textarea id="kudos-msg" placeholder="${t('kudosMsgPlaceholder')}" maxlength="140" rows="1" ${state.kudosLeft <= 0 ? 'disabled' : ''}></textarea>
+        <button class="btn pink" id="kudos-send" ${state.kudosLeft <= 0 ? 'disabled' : ''} onclick="sendKudos()">
+          ${state.kudosLeft <= 0 ? t('kudosLimitReached') : t('kudosSendBtn')}
+        </button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">${t('myKudosTitle')}</div>
+      <div class="panel-note">${t('myKudosSub')}</div>
+      <div class="feed">${feedHtml}</div>
+    </div>
+  `;
+}
+
+// ============================================================
+// PAGE: 📝 Подати заявку
+// ============================================================
+function renderPageClaim_(){
+  const CE = state.currencyEmoji, CN = state.currencyName;
+  const sortedEarnCategories = state.earnCategories.filter(c => !c.displayGroup).slice().sort((a, b) => {
+    if (a.coins !== b.coins) return a.coins - b.coins;
+    return stripLeadingEmoji_(catLabel(a)).localeCompare(stripLeadingEmoji_(catLabel(b)), currentLang === 'en' ? 'en' : 'uk');
+  });
+
+  const campaignGroups = buildDisplayGroups_(state.earnCategories, state.campaignCategories);
+  if (activeClaimGroup !== 'base' && !campaignGroups.find(g => g.groupId === activeClaimGroup)) {
+    activeClaimGroup = 'base';
+  }
+
+  const claimGroupTabsHtml = `
+    <div class="cat-groups">
+      <button class="cat-group-btn ${activeClaimGroup === 'base' ? 'active' : ''}" onclick="setClaimGroup('base')">${t('catGroupBase')}</button>
+      ${campaignGroups.map(g => `<button class="cat-group-btn ${activeClaimGroup === g.groupId ? 'active' : ''}" onclick="setClaimGroup('${g.groupId}')">${escapeHtml(campaignGroupLabel(g))}</button>`).join('')}
+    </div>
+  `;
+
+  let claimCategoryOptions;
+  if (activeClaimGroup === 'base') {
+    claimCategoryOptions = sortedEarnCategories.map(c => `<option value="${c.id}">${escapeHtml(stripLeadingEmoji_(catLabel(c)))} — ${c.coins} ${CE}</option>`).join('');
+  } else {
+    const grp = campaignGroups.find(g => g.groupId === activeClaimGroup);
+    const items = grp ? grp.items.slice().sort((a, b) => a.coins - b.coins) : [];
+    claimCategoryOptions = items.length
+      ? items.map(c => `<option value="${c.id}">${escapeHtml(campaignTitle(c))} — ${c.coins} ${CE}</option>`).join('')
+      : '';
+  }
+  const claimCategoryEmptyHtml = (activeClaimGroup !== 'base' && !claimCategoryOptions)
+    ? `<div class="cat-group-empty">${t('noCampaignCategories')}</div>` : '';
+
+  const subRowHtml_ = s => `
+    <div class="sub-row">
+      <div class="sub-row-main"><span class="cat">${escapeHtml(stripLeadingEmoji_(currentLang === 'en' && s.categoryLabelEn ? s.categoryLabelEn : s.categoryLabel))}</span><span class="coins">${s.coins} ${CE}</span></div>
+      ${statusBadge(s.status)}
+    </div>`;
+  const mySubmissionsHtml = state.mySubmissions.length ? state.mySubmissions.map(subRowHtml_).join('') : `<div class="hint">${t('noSubmissions')}</div>`;
+
+  return `
+    ${renderContentHeader_('navClaim')}
+    <div class="panel claim-panel">
+      <div class="panel-title">${t('claimPanelTitle')(escapeHtml(CN))}</div>
+      <div class="panel-note">${t('claimPanelNote')}</div>
+      ${claimGroupTabsHtml}
+      ${claimCategoryEmptyHtml}
+      <div class="form-row" style="margin-bottom:6px; display:${claimCategoryEmptyHtml ? 'none' : 'flex'};">
+        <select id="claim-category" onchange="updateClaimHint()">${claimCategoryOptions}</select>
+      </div>
+      <div class="hint" id="claim-hint"></div>
+      <div id="claim-ach-tag"></div>
+      <div class="form-row" style="display:${claimCategoryEmptyHtml ? 'none' : 'flex'};">
+        <textarea id="claim-proof" placeholder="${t('claimProofPlaceholder')}"></textarea>
+        <button class="btn blue" id="claim-submit" onclick="submitClaim()">${t('claimSubmitBtn')}</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">${t('mySubmissionsTitle')}</div>
+      ${mySubmissionsHtml}
+    </div>
+  `;
+}
+function setClaimGroup(groupId){ activeClaimGroup = groupId; render(); }
+
+// ============================================================
+// PAGE: 🎁 Reward Shop
+// ============================================================
+function renderPageShop_(){
+  const rewardsHtml = state.rewards.map(r => {
+    const owned = state.owned.includes(r.id);
+    const canBuy = !r.soldOut && !owned && state.balance >= r.price;
+    let action;
+    if (r.soldOut) action = `<button class="card-action locked" disabled>${t('rewardSoldOut')}</button>`;
+    else if (owned) action = `<button class="card-action owned" disabled>${t('rewardOwned')}</button>`;
+    else if (canBuy) action = `<button class="card-action buy" onclick="openConfirm('${r.id}')">${t('rewardBuyBtn')}</button>`;
+    else action = `<button class="card-action locked" disabled>${t('rewardNeedMore')(fmt(r.price - state.balance), state.currencyEmoji)}</button>`;
+    return `
+      <div class="card ${r.soldOut ? 'sold-out' : ''}">
+        <div class="card-media">${r.emoji}</div>
+        <div class="card-body">
+          <div class="card-top"><div class="card-name">${escapeHtml(rewardName(r))}</div><div class="card-price">${fmt(r.price)} ${state.currencyEmoji}</div></div>
+          <div class="card-desc">${escapeHtml(rewardDesc(r))}</div>
+          ${r.stock ? `<div class="card-stock">${r.soldOut ? t('rewardAllSoldOut') : t('rewardRemaining')(r.remaining)}</div>` : ''}
+          ${action}
+        </div>
+      </div>`;
+  }).join('');
+
+  return `
+    ${renderContentHeader_('navShop')}
+    <div class="section-sub">${t('rewardShopSub')(escapeHtml(state.currencyName))}</div>
+    <div class="grid">${rewardsHtml}</div>
+  `;
+}
+
+// ============================================================
+// PAGE: 🏆 Лідери
+// ============================================================
+function renderPageLeaders_(){
+  const CE = state.currencyEmoji;
+  const kudosLbHtml = state.kudosLeaderboard.length ? state.kudosLeaderboard.map((l, i) => `
+    <div class="lb-row">
+      <div class="lb-row-left"><span class="lb-marker">${i + 1}.</span><span class="lb-name">${escapeHtml(l.name)}</span></div>
+      <div class="lb-value">${l.count} 💜</div>
+    </div>`).join('') : `<div class="hint">${t('leaderboardEmpty')}</div>`;
+
+  const categoryLbHtml = state.categoryLeaders.length ? state.categoryLeaders.map(c => {
+    const labelText = currentLang === 'en' && c.labelEn ? c.labelEn : c.label;
+    const spaceIdx = labelText.indexOf(' ');
+    const icon = spaceIdx === -1 ? '🏷️' : labelText.slice(0, spaceIdx);
+    const rest = spaceIdx === -1 ? labelText : labelText.slice(spaceIdx + 1);
+    return `
+    <div class="lb-row">
+      <div class="lb-row-left"><span class="lb-marker">${icon}</span><span><span class="lb-name">${escapeHtml(rest)}</span><br><span class="lb-name">${escapeHtml(c.leaderName)}</span></span></div>
+      <div class="lb-value">${fmt(c.coins)} ${CE}</div>
+    </div>`;
+  }).join('') : `<div class="hint">${t('leaderboardEmpty')}</div>`;
+
+  return `
+    ${renderContentHeader_('navLeaders')}
+    <div class="lb-card">
+      <div class="lb-card-title">💜 ${t('leaderboardKudos')}</div>
+      ${kudosLbHtml}
+    </div>
+    <div class="lb-card">
+      <div class="lb-card-title">🎯 ${t('leaderboardCategory')}</div>
+      <div class="lb-card-note">${t('leaderboardCategoryNote')}</div>
+      ${categoryLbHtml}
+    </div>
+  `;
+}
+
+// ============================================================
+// PAGE: 🏅 Ачівки
+// ============================================================
+function renderPageAchievements_(){
+  const CE = state.currencyEmoji;
+  const cardsHtml = (state.achievements || []).map(a => {
+    const earnedDateStr = a.earned && a.earnedAt ? new Date(a.earnedAt).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'uk-UA') : '';
+    let statusHtml;
+    if (a.earned) {
+      statusHtml = `<div class="hint" style="margin:0;">${t('achievementsEarnedOn')(earnedDateStr)}</div>`;
+    } else if (a.progress && !a.progress.target) {
+      statusHtml = `<div class="hint" style="margin:0;">${currentLang === 'en' ? 'Accumulated' : 'Накопичено'}: ${fmt(a.progress.current)} ${CE}</div>`;
+    } else if (a.progress && a.progress.target > 0) {
+      const pct = Math.max(0, Math.min(100, Math.round((a.progress.current / a.progress.target) * 100)));
+      statusHtml = `
+        <div class="progress-track" style="margin-top:2px;"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="hint" style="margin:6px 0 0;">${a.progress.current} / ${a.progress.target}</div>`;
+    } else {
+      statusHtml = `<div class="hint" style="margin:0;">${t('achievementsLocked')}</div>`;
+    }
+    return `
+      <div class="card ${a.earned ? '' : 'achievement-locked'}">
+        <div class="card-media achievement-badge-emoji">${a.earned ? a.emoji : '🔒'}</div>
+        <div class="card-body">
+          <div class="card-top"><div class="card-name">${escapeHtml(achievementLabel(a))}</div><span class="achievement-coins-tag">+${fmt(a.coins)} ${CE}</span></div>
+          <div class="card-desc">${escapeHtml(achievementDesc(a))}</div>
+          ${statusHtml}
+        </div>
+      </div>`;
+  }).join('');
+
+  return `
+    ${renderContentHeader_('navAchievements')}
+    <div class="section-sub">${t('achievementsSub')}</div>
+    <div class="grid">${cardsHtml}</div>
+  `;
+}
+
+// ============================================================
+// PAGE: 💬 Відгуки
+// ============================================================
+function renderPageFeedback_(){
+  return `
+    ${renderContentHeader_('navFeedback')}
+    <div class="panel">
+      <div class="panel-title">${t('suggestionsTitle')}</div>
+      <div class="panel-note">${t('suggestionsNote')}</div>
+      <div class="form-row">
+        <textarea id="suggestion-text" placeholder="${t('suggestionPlaceholder')}"></textarea>
+        <button class="btn blue" id="suggestion-submit" onclick="submitSuggestionItem()">${t('suggestionSubmitBtn')}</button>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// ADMIN PAGE: 🛠️ Заявки на розгляді
+// ============================================================
+function renderPagePending_(){
+  const CE = state.currencyEmoji;
+  const pendingHtml = state.pendingSubmissions.length ? state.pendingSubmissions.map(p => `
+    <div class="pending-item">
+      <div class="pending-top"><b>${escapeHtml(p.name)}</b><span>${escapeHtml(stripLeadingEmoji_(currentLang === 'en' && p.categoryLabelEn ? p.categoryLabelEn : p.categoryLabel))} · ${p.coins} ${CE}</span></div>
+      <div class="pending-proof">${escapeHtml(p.proofText)}</div>
+      <div class="pending-actions">
+        <button class="btn mint" onclick="reviewSubmission('${p.id}','approve')">${t('approveBtn')}</button>
+        <button class="btn ghost" onclick="reviewSubmission('${p.id}','reject')">${t('rejectBtn')}</button>
+      </div>
+    </div>`).join('') : `<div class="hint">${t('noPending')}</div>`;
+
+  return `
+    ${renderContentHeader_('navPending')}
+    <div class="panel">${pendingHtml}</div>
+  `;
+}
+
+// ============================================================
+// ADMIN/MANAGER PAGE: 🪙 Secret Coin
+// ============================================================
+function renderPageSecretCoin_(){
+  return `
+    ${renderContentHeader_('navSecretCoin')}
+    <div class="panel admin-panel">
+      <div class="panel-note" style="margin-top:0;">
+        ${t('secretCoinNote')} ·
+        <span style="color:var(--gold);font-weight:700;">${t('secretCoinRemaining')(fmt(state.secretCoinRemaining), state.currencyEmoji)}</span>
+      </div>
+      <div id="sk-error" style="display:none; margin-bottom:12px; padding:10px 12px; border-radius:10px; background:rgba(232,82,122,0.14); border:1px solid rgba(232,82,122,0.4); color:var(--coral); font-size:12.5px; font-weight:600;"></div>
+      <div class="form-row" style="margin-bottom:8px;">
+        <div class="combo-wrap">
+          <input type="text" id="sk-to-1-search" class="combo-input" placeholder="${t('secretCoinRecipientPlaceholder')}" autocomplete="off" oninput="onComboInput_('sk-to-1')" onfocus="onComboFocus_('sk-to-1')">
+          <input type="hidden" id="sk-to-1" value="">
+          <div class="combo-dropdown" id="sk-to-1-dropdown"></div>
+        </div>
+        <input type="text" inputmode="numeric" pattern="[0-9]*" id="sk-coins-1" placeholder="${t('secretCoinCoinsPlaceholder')}">
+      </div>
+      <div class="form-row" style="margin-bottom:10px;">
+        <textarea id="sk-reason" placeholder="${t('secretCoinReasonPlaceholder')}"></textarea>
+      </div>
+      <button class="btn gold" id="sk-submit" onclick="grantSecretCoin()">${t('secretCoinSubmitBtn')}</button>
+      <div class="hint">${t('secretCoinHint')}</div>
+    </div>
+  `;
+}
+
+// ============================================================
+// ADMIN PAGE: 📊 Статистика
+// ============================================================
+function loadStats_(){
+  statsLoading = true;
+  render();
+  google.script.run
+    .withSuccessHandler(function(stats){ statsData = stats; statsLoading = false; render(); })
+    .withFailureHandler(function(err){ statsLoading = false; showToast(translateError_(err.message || String(err))); render(); })
+    .getAdminStats();
+}
+function refreshStats_(){ statsData = null; loadStats_(); }
+
+function renderPageStats_(){
+  const CE = state.currencyEmoji;
+  let bodyHtml;
+  if (statsLoading || !statsData) {
+    bodyHtml = `<div class="hint">${t('statsLoading')}</div>`;
+  } else {
+    const s = statsData;
+    const claimsBlock = s.totalClaims
+      ? `<div>${t('statsClaimsTotal')(fmt(s.totalClaims))}</div>
+         <div class="hint" style="margin:2px 0 6px;">${t('statsClaimsBreakdown')(fmt(s.claimsApproved), fmt(s.claimsRejected), fmt(s.claimsPending))}</div>
+         ${s.topClaimCategory ? `<div class="hint" style="margin:0;">${t('statsClaimsTopCategory')(escapeHtml(stripLeadingEmoji_(s.topClaimCategory)), fmt(s.topClaimCategoryCount))}</div>` : ''}`
+      : `<div class="hint" style="margin:0;">${t('statsClaimsNone')}</div>`;
+    const rewardsBlock = s.totalOrders
+      ? `<div>${t('statsOrdersTotal')(fmt(s.totalOrders))}</div>
+         <div class="hint" style="margin:2px 0 6px;">${t('statsCoinsSpent')(fmt(s.totalCoinsSpent), CE)}</div>
+         ${s.topReward ? `<div class="hint" style="margin:0;">${t('statsTopReward')(escapeHtml(s.topReward), fmt(s.topRewardCount))}</div>` : ''}`
+      : `<div class="hint" style="margin:0;">${t('statsRewardsNone')}</div>`;
+
+    bodyHtml = `
+      <div class="panel" style="font-size:13px; line-height:1.7;">
+        <b>${t('statsEngagementTitle')}</b><br>
+        ${t('statsTotalUsers')(fmt(s.totalUsers))}<br>
+        ${t('statsTotalCoinsHeld')(fmt(s.totalCoinsHeld), CE)}
+
+        <div style="margin-top:14px;"><b>${t('statsKudosTitle')}</b></div>
+        ${t('statsKudosGiven')(fmt(s.totalKudosGiven))}<br>
+        ${t('statsKudosGivers')(fmt(s.uniqueKudosGivers))}<br>
+        ${t('statsKudosReceivers')(fmt(s.uniqueKudosReceivers))}
+
+        <div style="margin-top:14px;"><b>${t('statsClaimsTitle')}</b></div>
+        ${claimsBlock}
+
+        <div style="margin-top:14px;"><b>${t('statsSecretCoinTitle')}</b></div>
+        ${t('statsSecretCoinGrants')(fmt(s.secretCoinGrantsCount))}<br>
+        ${t('statsSecretCoinTotal')(fmt(s.secretCoinTotalCoins), CE)}
+
+        <div style="margin-top:14px;"><b>${t('statsRewardsTitle')}</b></div>
+        ${rewardsBlock}
+
+        <div style="margin-top:14px;"><b>${t('statsSuggestionsTitle')}</b></div>
+        ${t('statsSuggestionsTotal')(fmt(s.totalSuggestions), fmt(s.newSuggestions))}
+      </div>
+    `;
+  }
+
+  return `
+    ${renderContentHeader_('navStats')}
+    <button class="btn ghost" style="margin-bottom:16px;" onclick="refreshStats_()">🔄 ${currentLang==='en'?'Refresh':'Оновити'}</button>
+    ${bodyHtml}
+  `;
+}
+
+// ============================================================
+// ADMIN PAGE: 👥 Адміни та менеджери
+// ============================================================
+function renderPagePeople_(){
+  const adminsHtml = state.admins.length ? state.admins.map(a => `
+    <div class="admin-chip">
+      <span>${escapeHtml(a)}</span>
+      <button onclick="removeAdmin('${escapeHtml(a)}')">${t('removeBtn')}</button>
+    </div>`).join('') : '';
+  const managersHtml = state.managers.length ? state.managers.map(m => `
+    <div class="admin-chip">
+      <span>${escapeHtml(m)}</span>
+      <button onclick="removeManagerItem('${escapeHtml(m)}')">${t('removeBtn')}</button>
+    </div>`).join('') : `<div class="hint">${t('noManagers')}</div>`;
+
+  return `
+    ${renderContentHeader_('navPeople')}
+    <div class="panel">
+      <div class="panel-title">${t('adminsSectionTitle')}</div>
+      <div class="admin-list">${adminsHtml}
+        <div class="admin-chip" style="background:transparent;padding:0;">
+          <span class="owner-tag">${t('ownerLabel')(escapeHtml(state.ownerEmail))}</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <input type="text" id="new-admin-email" placeholder="${t('addAdminPlaceholder')}">
+        <button class="btn blue" onclick="addAdmin()">${t('addAdminBtn')}</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">${t('managersSectionTitle')}</div>
+      <div class="hint" style="margin-top:-4px;">${t('managersSectionNote')}</div>
+      <div class="admin-list">${managersHtml}</div>
+      <div class="form-row">
+        <input type="text" id="new-manager-email" placeholder="${t('addManagerPlaceholder')}">
+        <button class="btn blue" onclick="addManagerItem()">${t('addManagerBtn')}</button>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// ADMIN PAGE: 🎁 Товари Reward Shop
+// ============================================================
+function renderPageShopAdmin_(){
+  const CE = state.currencyEmoji;
+  const rewardsListHtml = state.rewards.length ? state.rewards.map(r => `
+    <div class="admin-chip">
+      <span>${r.emoji} ${escapeHtml(rewardName(r))} — ${fmt(r.price)} ${CE}</span>
+      <button onclick="removeRewardItem('${r.id}')">${t('removeBtn')}</button>
+    </div>`).join('') : '';
+
+  return `
+    ${renderContentHeader_('navShopAdmin')}
+    <div class="panel">
+      <div class="admin-list" style="max-height:280px; overflow-y:auto;">${rewardsListHtml}</div>
+      <div class="form-row" style="margin-bottom:8px; margin-top:10px;">
+        <input type="text" id="new-reward-name" placeholder="${t('rewardNamePlaceholder')}">
+        <input type="text" id="new-reward-name-en" placeholder="${t('rewardNameEnPlaceholder')}">
+      </div>
+      <div class="form-row" style="margin-bottom:8px;">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" id="new-reward-price" placeholder="${t('rewardPricePlaceholder')}">
+        <input type="text" id="new-reward-emoji" placeholder="${t('rewardEmojiPlaceholder')}" maxlength="4" style="flex:0 0 70px;">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" id="new-reward-stock" placeholder="${t('rewardStockPlaceholder')}">
+      </div>
+      <div class="form-row" style="margin-bottom:8px;">
+        <input type="text" id="new-reward-desc" placeholder="${t('rewardDescPlaceholder')}">
+        <input type="text" id="new-reward-desc-en" placeholder="${t('rewardDescEnPlaceholder')}">
+      </div>
+      <button class="btn gold" id="add-reward-btn" onclick="addRewardItem()">${t('addRewardBtn')}</button>
+    </div>
+  `;
+}
+
+// ============================================================
+// ADMIN PAGE: 🎯 Кампанійні активності
+// ============================================================
+function renderPageCampaignAdmin_(){
+  const CE = state.currencyEmoji;
+  const campaignGroups = groupCampaignCategories_(state.campaignCategories);
+  const campaignListHtml = campaignGroups.length ? campaignGroups.map(g => `
+    <div class="campaign-chip-group">
+      <div class="campaign-chip-group-title">${escapeHtml(campaignGroupLabel(g))}</div>
+      ${g.items.map(c => `
+        <div class="admin-chip">
+          <span>${escapeHtml(campaignTitle(c))} — ${fmt(c.coins)} ${CE}</span>
+          <button onclick="removeCampaignItem('${c.id}')">${t('removeBtn')}</button>
+        </div>`).join('')}
+    </div>
+  `).join('') : `<div class="hint">${t('noCampaignCategories')}</div>`;
+
+  return `
+    ${renderContentHeader_('navCampaignAdmin')}
+    <div class="panel">
+      <div class="panel-note" style="margin-top:0;">${t('manageCampaignNote')}</div>
+      <div class="admin-list" style="max-height:320px; overflow-y:auto;">${campaignListHtml}</div>
+      <div class="form-row" style="margin-bottom:8px; margin-top:10px;">
+        <input type="text" id="new-campaign-group" placeholder="${t('campaignGroupPlaceholder')}">
+        <input type="text" id="new-campaign-title" placeholder="${t('campaignTitlePlaceholder')}">
+      </div>
+      <div class="form-row" style="margin-bottom:8px;">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" id="new-campaign-coins" placeholder="${t('campaignCoinsPlaceholder')}">
+        <input type="text" id="new-campaign-proof" placeholder="${t('campaignProofPlaceholder')}">
+      </div>
+      <button class="btn gold" id="add-campaign-btn" onclick="addCampaignItem()">${t('addCampaignBtn')}</button>
+    </div>
+  `;
+}
+
+// ============================================================
+// ADMIN PAGE: 💬 Нові відгуки
+// ============================================================
+function renderPageSuggestionsAdmin_(){
+  const suggestionsListHtml = state.pendingSuggestions.length ? state.pendingSuggestions.map(sg => `
+    <div class="pending-item">
+      <div class="pending-top"><b>${escapeHtml(sg.name)}</b></div>
+      <div class="pending-proof">${escapeHtml(sg.text)}</div>
+      <div class="pending-actions">
+        <button class="btn mint" onclick="markSuggestionReadItem('${sg.id}')">${t('suggestionMarkReadBtn')}</button>
+      </div>
+    </div>`).join('') : `<div class="hint">${t('noSuggestions')}</div>`;
+
+  return `
+    ${renderContentHeader_('navSuggestionsAdmin')}
+    <button class="btn ghost" style="margin-bottom:16px;" onclick="openSuggestionsArchive()">📂 ${t('suggestionsArchiveBtn')}</button>
+    <div class="panel">${suggestionsListHtml}</div>
+  `;
+}
+
+// ============================================================
+// MAIN RENDER
+// ============================================================
+const PAGE_RENDERERS = {
+  home: renderPageHome_,
+  kudos: renderPageKudos_,
+  claim: renderPageClaim_,
+  shop: renderPageShop_,
+  leaders: renderPageLeaders_,
+  achievements: renderPageAchievements_,
+  feedback: renderPageFeedback_,
+  pending: renderPagePending_,
+  secretcoin: renderPageSecretCoin_,
+  stats: renderPageStats_,
+  people: renderPagePeople_,
+  shopadmin: renderPageShopAdmin_,
+  campaignadmin: renderPageCampaignAdmin_,
+  suggestionsadmin: renderPageSuggestionsAdmin_,
+};
+
+function renderInner_(){
+  const app = document.getElementById('app');
+
+  // Якщо людину прибрали з адмінів, повертаємо на головну.
+  const adminItem = ADMIN_NAV_ITEMS.find(i => i.id === currentPage);
+  if (adminItem && !adminItem.visible(state)) currentPage = 'home';
+
+  const pageFn = PAGE_RENDERERS[currentPage] || renderPageHome_;
+  const pageHtml = pageFn();
+
+  app.innerHTML = `
+    ${renderSidebar_()}
+    <div class="main-wrap">
+      <div class="main-content">
+        ${state.announcement ? `<div class="announcement">📣 ${escapeHtml(state.announcement)}</div>` : ''}
+        ${pageHtml}
+        <div style="text-align:center; margin-top:36px; padding-top:16px; border-top:1px solid var(--card-border); font-size:11px; color:var(--text-faint); letter-spacing:0.5px;">
+          Frontend: ${BUILD_VERSION}<br>Backend: ${escapeHtml(state.backendVersion || 'n/a')}
+        </div>
+      </div>
+    </div>
+  `;
+
+  updateClaimHint();
+}
+
+const DRAFT_TEXT_FIELD_IDS = ['kudos-msg', 'claim-proof', 'new-admin-email', 'new-manager-email', 'sk-coins-1', 'sk-reason', 'kudos-to-search', 'kudos-to', 'sk-to-1-search', 'sk-to-1', 'new-reward-name', 'new-reward-name-en', 'new-reward-price', 'new-reward-emoji', 'new-reward-desc', 'new-reward-desc-en', 'new-reward-stock', 'suggestion-text', 'new-campaign-group', 'new-campaign-title', 'new-campaign-coins', 'new-campaign-proof'];
+const DRAFT_SELECT_FIELD_IDS = ['claim-category'];
+const ALL_DRAFT_FIELD_IDS = DRAFT_TEXT_FIELD_IDS.concat(DRAFT_SELECT_FIELD_IDS);
+
+// Зберігає введений текст і фокус між перерендерами, щоб автооновлення
+// не стирало чернетку.
+function captureDraftState_(){
+  const saved = {};
+  ALL_DRAFT_FIELD_IDS.forEach(function(id){
+    const el = document.getElementById(id);
+    if (!el) return;
+    saved[id] = el.tagName === 'SELECT' ? el.selectedIndex : el.value;
+  });
+  const active = document.activeElement;
+  saved.__focusId = (active && active.id) ? active.id : null;
+  return saved;
+}
+
+function restoreDraftState_(saved){
+  ALL_DRAFT_FIELD_IDS.forEach(function(id){
+    if (!(id in saved)) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.tagName === 'SELECT') el.selectedIndex = saved[id];
+    else el.value = saved[id];
+  });
+  if (saved.__focusId) {
+    const el = document.getElementById(saved.__focusId);
+    if (el && el.focus) el.focus();
+  }
+}
+
+function render(){
+  const draft = captureDraftState_();
+  renderInner_();
+  restoreDraftState_(draft);
+}
+
+function updateClaimHint(){
+  const sel = document.getElementById('claim-category');
+  if (!sel || !state) return;
+  const found = findSelectedCategory_(sel.value);
+  let hintText = '';
+  let achievementId = null;
+  if (found) {
+    if (found.__base) { hintText = catProofHint(found); achievementId = found.achievementId || null; }
+    else { hintText = campaignProofHint(found); }
+  }
+  const hintEl = document.getElementById('claim-hint');
+  if (hintEl) hintEl.textContent = hintText;
+
+  const tagEl = document.getElementById('claim-ach-tag');
+  if (tagEl) {
+    if (achievementId) {
+      const ach = (state.achievements || []).find(a => a.id === achievementId);
+      const label = ach ? achievementLabel(ach) : achievementId;
+      const emoji = ach ? ach.emoji : '🏅';
+      tagEl.innerHTML = `<span class="ach-part-tag">${emoji} ${currentLang === 'en' ? 'Part of achievement' : 'Частина ачівки'}: ${escapeHtml(label)}</span>`;
+    } else {
+      tagEl.innerHTML = '';
+    }
+  }
+}
+
+function comboMatches_(query){
+  const q = (query || '').trim().toLowerCase();
+  const list = (state && state.colleagues) ? state.colleagues : [];
+  if (!q) return list.slice(0, 8);
+  return list.filter(c => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q)).slice(0, 8);
+}
+
+function renderComboDropdown_(prefix, query){
+  const dropdown = document.getElementById(prefix + '-dropdown');
+  if (!dropdown) return;
+  const matches = comboMatches_(query);
+  if (!matches.length) {
+    dropdown.innerHTML = `<div class="combo-empty">${currentLang === 'en' ? 'No matches' : 'Нічого не знайдено'}</div>`;
+  } else {
+    dropdown.innerHTML = matches.map(c =>
+      `<div class="combo-item" onmousedown="selectCombo_('${prefix}','${escapeHtml(c.email)}')">${escapeHtml(c.name)}</div>`
+    ).join('');
+  }
+  dropdown.style.display = 'block';
+}
+
+function onComboInput_(prefix){
+  const hidden = document.getElementById(prefix);
+  if (hidden) hidden.value = '';
+  renderComboDropdown_(prefix, document.getElementById(prefix + '-search').value);
+}
+
+function onComboFocus_(prefix){
+  renderComboDropdown_(prefix, document.getElementById(prefix + '-search').value);
+}
+
+function selectCombo_(prefix, email){
+  const c = (state.colleagues || []).find(x => x.email === email);
+  const hidden = document.getElementById(prefix);
+  const search = document.getElementById(prefix + '-search');
+  if (hidden) hidden.value = email;
+  if (search) search.value = c ? c.name : email;
+  const dropdown = document.getElementById(prefix + '-dropdown');
+  if (dropdown) { dropdown.style.display = 'none'; dropdown.innerHTML = ''; }
+}
+
+document.addEventListener('click', function(e){
+  document.querySelectorAll('.combo-dropdown').forEach(function(d){
+    const wrap = d.closest('.combo-wrap');
+    if (wrap && !wrap.contains(e.target)) d.style.display = 'none';
+  });
+});
+
+function loadState(){
+  google.script.run
+    .withSuccessHandler(function(s){ state = s; render(); })
+    .withFailureHandler(function(err){
+      document.getElementById('app').innerHTML = '<div class="error-note">' + escapeHtml(translateError_(err.message || String(err))) + '</div>';
+    })
+    .getState();
+}
+
+function openConfirm(rewardId){
+  const r = state.rewards.find(x => x.id === rewardId);
+  if (!r) return;
+  pendingRewardId = rewardId;
+  const box = document.getElementById('modal-box');
+  box.className = 'modal-box';
+  box.innerHTML = `
+    <div class="modal-emoji">${r.emoji}</div>
+    <div class="modal-title">${escapeHtml(rewardName(r))}</div>
+    <div class="modal-sub">${escapeHtml(rewardDesc(r))}</div>
+    <div class="modal-price">${fmt(r.price)} ${t('confirmFromBalance')(state.currencyEmoji)}</div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeModal()">${t('confirmCancel')}</button>
+      <button class="modal-btn confirm" id="confirm-btn" onclick="confirmPurchase()">${t('confirmSubmit')}</button>
+    </div>`;
+  showModal_();
+}
+function showModal_(){
+  window.scrollTo(0, 0);
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function closeModal(){ document.getElementById('modal-overlay').classList.remove('show'); pendingRewardId = null; }
+
+function openSuggestionsArchive(){
+  const box = document.getElementById('modal-box');
+  box.className = 'modal-box';
+  box.innerHTML = `<div class="modal-title">${t('suggestionsArchiveTitle')}</div><div class="modal-sub">${t('suggestionsArchiveLoading')}</div>`;
+  showModal_();
+
+  google.script.run
+    .withSuccessHandler(function(archive){ renderSuggestionsArchive_(archive); })
+    .withFailureHandler(function(err){
+      const box2 = document.getElementById('modal-box');
+      box2.innerHTML = `<div class="modal-title">${t('suggestionsArchiveTitle')}</div><div class="modal-sub">${escapeHtml(translateError_(err.message || String(err)))}</div><button class="modal-btn confirm" onclick="closeModal()">${t('statsCloseBtn')}</button>`;
+    })
+    .getSuggestionsArchive();
+}
+
+function renderSuggestionsArchive_(archive){
+  const listHtml = archive.length
+    ? archive.map(sg => `
+        <div class="pending-item">
+          <div class="pending-top"><b>${escapeHtml(sg.name)}</b></div>
+          <div class="pending-proof" style="margin-bottom:0;">${escapeHtml(sg.text)}</div>
+        </div>`).join('')
+    : `<div class="hint">${t('suggestionsArchiveEmpty')}</div>`;
+
+  const box = document.getElementById('modal-box');
+  box.className = 'modal-box';
+  box.innerHTML = `
+    <div class="modal-title" style="text-align:left;">${t('suggestionsArchiveTitle')}</div>
+    <div style="text-align:left; max-height:60vh; overflow-y:auto; margin:14px 0;">${listHtml}</div>
+    <button class="modal-btn confirm" style="width:100%;" onclick="closeModal()">${t('statsCloseBtn')}</button>
+  `;
+}
+
+function confirmPurchase(){
+  if (!pendingRewardId) return;
+  const btn = document.getElementById('confirm-btn');
+  const cancelBtn = document.querySelector('.modal-btn.cancel');
+  btn.disabled = true; cancelBtn.disabled = true; btn.textContent = t('confirmProcessing');
+  const rewardId = pendingRewardId;
+  const r = state.rewards.find(x => x.id === rewardId);
+
+  google.script.run
+    .withSuccessHandler(function(s){ state = s; render(); showSuccessModal(r); })
+    .withFailureHandler(function(err){
+      btn.disabled = false; cancelBtn.disabled = false; btn.textContent = t('confirmSubmit');
+      showToast(translateError_(err.message || String(err)));
+      loadState();
+    })
+    .buyReward(rewardId);
+}
+function showSuccessModal(r){
+  const box = document.getElementById('modal-box');
+  box.className = 'modal-box modal-success';
+  box.innerHTML = `
+    <div class="modal-emoji">🎉</div>
+    <div class="modal-title">${t('successTitle')}</div>
+    <div class="modal-sub">${t('successSub')(escapeHtml(rewardName(r)))}</div>
+    <button class="modal-btn close-success" onclick="closeModal()">${t('successClose')}</button>`;
+}
+
+function sendKudos(){
+  const toEl = document.getElementById('kudos-to');
+  const toSearchEl = document.getElementById('kudos-to-search');
+  const msgEl = document.getElementById('kudos-msg');
+  const sendBtn = document.getElementById('kudos-send');
+  const to = toEl.value, msg = msgEl.value.trim();
+  if (!to){ showToast(t('toastKudosChoose')); return; }
+  if (!msg){ showToast(t('toastKudosReason')); return; }
+
+  const originalLabel = sendBtn.textContent;
+  sendBtn.disabled = true; sendBtn.textContent = t('kudosSending');
+  toSearchEl.disabled = true; msgEl.disabled = true;
+
+  google.script.run
+    .withSuccessHandler(function(s){
+      toEl.value = ''; toSearchEl.value = ''; msgEl.value = '';
+      state = s; render();
+      showToast(t('toastKudosSent'));
+    })
+    .withFailureHandler(function(err){
+      showToast(translateError_(err.message || String(err)));
+      sendBtn.disabled = false; sendBtn.textContent = originalLabel;
+      toSearchEl.disabled = false; msgEl.disabled = false;
+      loadState();
+    })
+    .sendKudos(to, msg);
+}
+
+function submitClaim(){
+  const catEl = document.getElementById('claim-category');
+  const proofEl = document.getElementById('claim-proof');
+  const btn = document.getElementById('claim-submit');
+  const proof = proofEl.value.trim();
+  if (!proof){ showToast(t('toastClaimProof')); return; }
+
+  const original = btn.textContent;
+  btn.disabled = true; btn.textContent = t('claimSending');
+
+  google.script.run
+    .withSuccessHandler(function(s){
+      proofEl.value = ''; catEl.selectedIndex = 0;
+      state = s; render();
+      showToast(t('toastClaimSent'));
+    })
+    .withFailureHandler(function(err){
+      showToast(translateError_(err.message || String(err)));
+      btn.disabled = false; btn.textContent = original;
+      loadState();
+    })
+    .submitClaim(catEl.value, proof);
+}
+
+function reviewSubmission(id, decision){
+  google.script.run
+    .withSuccessHandler(function(s){ state = s; render(); showToast(decision === 'approve' ? t('toastApproved') : t('toastRejected')); })
+    .withFailureHandler(function(err){ showToast(translateError_(err.message || String(err))); loadState(); })
+    .reviewSubmission(id, decision);
+}
+
+function addAdmin(){
+  const el = document.getElementById('new-admin-email');
+  const email = el.value.trim();
+  if (!email){ showToast(t('toastAdminEnterEmail')); return; }
+  google.script.run
+    .withSuccessHandler(function(s){
+      el.value = '';
+      state = s; render();
+      showToast(t('toastAdminAdded'));
+    })
+    .withFailureHandler(function(err){ showToast(translateError_(err.message || String(err))); })
+    .addAdmin(email);
+}
+function removeAdmin(email){
+  google.script.run
+    .withSuccessHandler(function(s){ state = s; render(); showToast(t('toastAdminRemoved')); })
+    .withFailureHandler(function(err){ showToast(translateError_(err.message || String(err))); })
+    .removeAdmin(email);
+}
+
+function addManagerItem(){
+  const el = document.getElementById('new-manager-email');
+  const email = el.value.trim();
+  if (!email){ showToast(t('toastAdminEnterEmail')); return; }
+  google.script.run
+    .withSuccessHandler(function(s){
+      el.value = '';
+      state = s; render();
+      showToast(t('toastManagerAdded'));
+    })
+    .withFailureHandler(function(err){ showToast(translateError_(err.message || String(err))); })
+    .addManager(email);
+}
+function removeManagerItem(email){
+  google.script.run
+    .withSuccessHandler(function(s){ state = s; render(); showToast(t('toastManagerRemoved')); })
+    .withFailureHandler(function(err){ showToast(translateError_(err.message || String(err))); })
+    .removeManager(email);
+}
+
+function addRewardItem(){
+  const nameEl = document.getElementById('new-reward-name');
+  const nameEnEl = document.getElementById('new-reward-name-en');
+  const priceEl = document.getElementById('new-reward-price');
+  const emojiEl = document.getElementById('new-reward-emoji');
+  const descEl = document.getElementById('new-reward-desc');
+  const descEnEl = document.getElementById('new-reward-desc-en');
+  const stockEl = document.getElementById('new-reward-stock');
+
+  const name = nameEl.value.trim();
+  const price = parseInt((priceEl.value || '').replace(/\D/g, ''), 10) || 0;
+  if (!name || price <= 0){ showToast(t('toastRewardNeedName')); return; }
+
+  const nameEn = nameEnEl.value.trim();
+  const emoji = emojiEl.value.trim();
+  const desc = descEl.value.trim();
+  const descEn = descEnEl.value.trim();
+  const stock = parseInt((stockEl.value || '').replace(/\D/g, ''), 10) || '';
+
+  const btn = document.getElementById('add-reward-btn');
+  btn.disabled = true; btn.textContent = t('addRewardSending');
+
+  google.script.run
+    .withSuccessHandler(function(s){
+      nameEl.value = ''; nameEnEl.value = ''; priceEl.value = '';
+      emojiEl.value = ''; descEl.value = ''; descEnEl.value = ''; stockEl.value = '';
+      state = s; render();
+      showToast(t('toastRewardAdded'));
+    })
+    .withFailureHandler(function(err){
+      showToast(translateError_(err.message || String(err)));
+      btn.disabled = false; btn.textContent = t('addRewardBtn');
+    })
+    .addReward(name, nameEn, price, emoji, desc, descEn, stock);
+}
+
+function removeRewardItem(rewardId){
+  google.script.run
+    .withSuccessHandler(function(s){ state = s; render(); showToast(t('toastRewardRemoved')); })
+    .withFailureHandler(function(err){ showToast(translateError_(err.message || String(err))); })
+    .removeReward(rewardId);
+}
+
+function addCampaignItem(){
+  const groupEl = document.getElementById('new-campaign-group');
+  const titleEl = document.getElementById('new-campaign-title');
+  const coinsEl = document.getElementById('new-campaign-coins');
+  const proofEl = document.getElementById('new-campaign-proof');
+
+  const group = groupEl.value.trim();
+  const title = titleEl.value.trim();
+  const coins = parseInt((coinsEl.value || '').replace(/\D/g, ''), 10) || 0;
+  if (!group || !title || coins <= 0){ showToast(t('toastCampaignNeedFields')); return; }
+
+  const proofHint = proofEl.value.trim();
+
+  const btn = document.getElementById('add-campaign-btn');
+  btn.disabled = true; btn.textContent = t('addCampaignSending');
+
+  google.script.run
+    .withSuccessHandler(function(s){
+      groupEl.value = ''; titleEl.value = ''; coinsEl.value = ''; proofEl.value = '';
+      state = s; render();
+      showToast(t('toastCampaignAdded'));
+    })
+    .withFailureHandler(function(err){
+      showToast(translateError_(err.message || String(err)));
+      btn.disabled = false; btn.textContent = t('addCampaignBtn');
+    })
+    .addCampaignCategory(group, '', title, '', coins, proofHint, '');
+}
+
+function removeCampaignItem(categoryId){
+  google.script.run
+    .withSuccessHandler(function(s){ state = s; render(); showToast(t('toastCampaignRemoved')); })
+    .withFailureHandler(function(err){ showToast(translateError_(err.message || String(err))); })
+    .removeCampaignCategory(categoryId);
+}
+
+function submitSuggestionItem(){
+  const textEl = document.getElementById('suggestion-text');
+  const btn = document.getElementById('suggestion-submit');
+  const text = textEl.value.trim();
+  if (!text){ showToast(t('toastSuggestionEmpty')); return; }
+
+  const original = btn.textContent;
+  btn.disabled = true; btn.textContent = t('suggestionSending');
+
+  google.script.run
+    .withSuccessHandler(function(s){
+      textEl.value = '';
+      state = s; render();
+      showToast(t('toastSuggestionSent'));
+    })
+    .withFailureHandler(function(err){
+      showToast(translateError_(err.message || String(err)));
+      btn.disabled = false; btn.textContent = original;
+    })
+    .submitSuggestion(text);
+}
+
+function markSuggestionReadItem(id){
+  google.script.run
+    .withSuccessHandler(function(s){ state = s; render(); showToast(t('toastSuggestionRead')); })
+    .withFailureHandler(function(err){ showToast(translateError_(err.message || String(err))); })
+    .markSuggestionRead(id);
+}
+
+function grantSecretCoin(){
+  const to1El = document.getElementById('sk-to-1');
+  const to1SearchEl = document.getElementById('sk-to-1-search');
+  const coins1El = document.getElementById('sk-coins-1');
+  const reasonEl = document.getElementById('sk-reason');
+  const errorEl = document.getElementById('sk-error');
+  errorEl.style.display = 'none';
+
+  const to1 = to1El.value;
+  const coins1 = parseInt((coins1El.value || '').replace(/\D/g, ''), 10) || 0;
+  const reason = reasonEl.value.trim();
+
+  if (!to1 || coins1 <= 0){ showToast(t('toastSkChoose')); return; }
+  if (!reason){ showToast(t('toastSkReason')); return; }
+
+  const entries = [{ email: to1, coins: coins1, reason: reason }];
+
+  const btn = document.getElementById('sk-submit');
+  btn.disabled = true; btn.textContent = t('secretCoinSending');
+
+  google.script.run
+    .withSuccessHandler(function(s){
+      to1El.value = ''; to1SearchEl.value = ''; coins1El.value = '';
+      reasonEl.value = '';
+      state = s; render();
+      showToast(t('toastScSent'));
+    })
+    .withFailureHandler(function(err){
+      const msg = translateError_(err.message || String(err));
+      showToast(msg);
+      const errEl = document.getElementById('sk-error');
+      if (errEl){ errEl.textContent = '⚠️ ' + msg; errEl.style.display = 'block'; }
+      btn.disabled = false; btn.textContent = t('secretCoinSubmitBtn');
+    })
+    .grantSecretCoin(entries);
+}
+
+// Тихе автооновлення раз на хвилину — пропускається, поки людина щось вводить.
+const POLL_INTERVAL_MS = 60000;
+let pollTimer = null;
+
+function isActivelyEditing_(){
+  const el = document.activeElement;
+  if (!el) return false;
+  const tag = el.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+}
+
+function hasUnsavedDraft_(){
+  const textDirty = DRAFT_TEXT_FIELD_IDS.some(function(id){
+    const el = document.getElementById(id);
+    return el && el.value && el.value.trim().length > 0;
+  });
+  if (textDirty) return true;
+  return DRAFT_SELECT_FIELD_IDS.some(function(id){
+    const el = document.getElementById(id);
+    return el && el.selectedIndex > 0;
+  });
+}
+
+function shouldSkipRefresh_(){
+  return isActivelyEditing_() || hasUnsavedDraft_();
+}
+
+function silentRefresh(){
+  if (pendingRewardId) return;
+  if (document.hidden) return;
+  if (shouldSkipRefresh_()) return;
+
+  google.script.run
+    .withSuccessHandler(function(s){
+      if (shouldSkipRefresh_() || pendingRewardId) return;
+      state = s; render();
+      updateClaimHint();
+    })
+    .withFailureHandler(function(){})
+    .getState();
+}
+function startPolling(){ if (!pollTimer) pollTimer = setInterval(silentRefresh, POLL_INTERVAL_MS); }
+
+loadState();
+startPolling();
+</script>
+
+</body>
+</html>

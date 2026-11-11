@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Форма рекомендації · Reference Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     RECRUITER MODE
+════════════════════════════════════════════ -->
+<div id="recruiter-mode">
+  <div class="hero">
+    <div class="geo geo1"></div>
+    <div class="geo geo2"></div>
+    <div class="geo geo3"></div>
+    <div class="geo geo4"></div>
+    <div class="logo">
+      <div class="logo-text">Reference<em> Check</em></div>
+    </div>
+    <h1>Форма рекомендації<br>для рекрутера</h1>
+    <p>Налаштуйте форму → згенеруйте посилання → надішліть референту</p>
+    <div class="hero-badge">
+      <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      Усі відповіді конфіденційні
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- Step 1 · Candidate -->
+    <div class="card">
+      <div class="card-header">
+        <div class="step-num">1</div>
+        <div>
+          <div class="card-title">Про кандидата</div>
+          <div class="card-sub">Базова інформація, яку побачить референт у шапці форми</div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">Ім'я та прізвище <span class="req">*</span></label>
+        <input type="text" id="cand-name" placeholder="Наприклад: Олена Ковальчук">
+      </div>
+      <div class="field">
+        <label class="lbl">Роль / посада <span class="req">*</span></label>
+        <input type="text" id="cand-role" placeholder="Наприклад: Head of Marketing">
+      </div>
+    </div>
+
+    <!-- Step 2 · Recruiter -->
+    <div class="card">
+      <div class="card-header">
+        <div class="step-num" style="background:var(--pink)">2</div>
+        <div>
+          <div class="card-title">Про себе (рекрутер)</div>
+          <div class="card-sub">Куди надіслати готовий результат</div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label class="lbl">Ваше ім'я <span class="req">*</span></label>
+          <input type="text" id="rec-name" placeholder="Ваше ім'я">
+        </div>
+        <div class="field">
+          <label class="lbl">Компанія <span class="opt">(не обов'язково)</span></label>
+          <input type="text" id="rec-company" placeholder="Назва компанії">
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">Telegram username <span class="req">*</span></label>
+        <div class="prefix-wrap">
+          <span class="prefix-sym">@</span>
+          <input type="text" id="rec-tg" placeholder="username"
+            oninput="this.value=this.value.replace(/[^a-zA-Z0-9_]/g,'')"
+            maxlength="32">
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">Особисте повідомлення референту <span class="opt">(до 200 знаків)</span></label>
+        <textarea id="rec-msg" placeholder="Наприклад: Привіт! Буду вдячна за чесний зворотний зв'язок. Це займе 5 хвилин." maxlength="200"></textarea>
+      </div>
+    </div>
+
+    <!-- Step 3 · Reference person -->
+    <div class="card">
+      <div class="card-header">
+        <div class="step-num" style="background:var(--cyan)">3</div>
+        <div>
+          <div class="card-title">Про референта</div>
+          <div class="card-sub">Референт побачить ці дані як «дано» — не витрачатиме час</div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label class="lbl">Ім'я та прізвище <span class="req">*</span></label>
+          <input type="text" id="ref-name" placeholder="Ім'я референта">
+        </div>
+        <div class="field">
+          <label class="lbl">Компанія <span class="req">*</span></label>
+          <input type="text" id="ref-company" placeholder="Компанія">
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">Тип зв'язку <span class="req">*</span></label>
+        <select id="ref-relation">
+          <option value="">Оберіть зі списку</option>
+          <option>Був(ла) прямим керівником кандидата</option>
+          <option>Працював(ла) як колега в одній команді</option>
+          <option>Кандидат був моїм підлеглим</option>
+          <option>Внутрішній замовник / стейкхолдер</option>
+          <option>Зовнішній клієнт / партнер</option>
+          <option>Інше</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl">Період співпраці</label>
+        <div class="period-wrap">
+          <div class="period-col">
+            <span class="period-label">Від</span>
+            <div class="period-selects">
+              <select id="from-year" onchange="onYearChange('from')">
+                <option value="">Рік</option>
+              </select>
+              <select id="from-month" disabled>
+                <option value="">Місяць</option>
+              </select>
+            </div>
+          </div>
+          <div class="period-sep">—</div>
+          <div class="period-col">
+            <span class="period-label">До</span>
+            <div class="period-selects">
+              <select id="to-year" onchange="onYearChange('to')">
+                <option value="">Рік</option>
+              </select>
+              <select id="to-month" disabled>
+                <option value="">Місяць</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 · Closed questions -->
+    <div class="card">
+      <div class="card-header">
+        <div class="step-num">4</div>
+        <div>
+          <div class="card-title">Закриті питання — оцінки 1–5</div>
+          <div class="card-sub">Компетенції для оцінки за шкалою</div>
+        </div>
+        <span class="counter-badge ml-auto" id="closed-count">5</span>
+      </div>
+      <div class="section-tag">Готовий банк</div>
+      <div class="toggle-group" id="closed-group">
+        <label class="toggle-item on" data-group="closed">
+          <input type="checkbox" checked>
+          <div><div class="toggle-label">Якість виконання завдань</div><div class="toggle-sublabel">Наскільки результати відповідають очікуванням</div></div>
+        </label>
+        <label class="toggle-item on" data-group="closed">
+          <input type="checkbox" checked>
+          <div><div class="toggle-label">Комунікація та взаємодія з командою</div><div class="toggle-sublabel">Вміння доносити ідеї, слухати, вирішувати конфлікти</div></div>
+        </label>
+        <label class="toggle-item on" data-group="closed">
+          <input type="checkbox" checked>
+          <div><div class="toggle-label">Ініціативність та проактивність</div><div class="toggle-sublabel">Чи пропонує рішення, не чекаючи вказівок</div></div>
+        </label>
+        <label class="toggle-item on" data-group="closed">
+          <input type="checkbox" checked>
+          <div><div class="toggle-label">Дотримання дедлайнів</div><div class="toggle-sublabel">Надійність у виконанні зобов'язань у строк</div></div>
+        </label>
+        <label class="toggle-item on" data-group="closed">
+          <input type="checkbox" checked>
+          <div><div class="toggle-label">Адаптивність до змін</div><div class="toggle-sublabel">Реакція на зміни пріоритетів або умов</div></div>
+        </label>
+        <label class="toggle-item" data-group="closed">
+          <input type="checkbox">
+          <div><div class="toggle-label">Лідерські якості</div><div class="toggle-sublabel">Здатність вести за собою та мотивувати</div></div>
+        </label>
+        <label class="toggle-item" data-group="closed">
+          <input type="checkbox">
+          <div><div class="toggle-label">Технічна компетентність</div><div class="toggle-sublabel">Глибина знань у профільній сфері</div></div>
+        </label>
+      </div>
+      <button class="add-btn" onclick="addCustomQuestion('closed-group','closed-count','closed')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Додати своє питання
+      </button>
+    </div>
+
+    <!-- Step 5 · Open questions -->
+    <div class="card">
+      <div class="card-header">
+        <div class="step-num" style="background:var(--pink)">5</div>
+        <div>
+          <div class="card-title">Відкриті питання — вільний текст</div>
+          <div class="card-sub">Розгорнуті відповіді від референта</div>
+        </div>
+        <span class="counter-badge pink ml-auto" id="open-count">4</span>
+      </div>
+      <div class="section-tag">Готовий банк</div>
+      <div class="toggle-group" id="open-group">
+        <label class="toggle-item on pink-mode" data-group="open">
+          <input type="checkbox" checked>
+          <div><div class="toggle-label">Найяскравіший внесок кандидата у спільній роботі</div><div class="toggle-sublabel">Конкретний результат або ситуація</div></div>
+        </label>
+        <label class="toggle-item on pink-mode" data-group="open">
+          <input type="checkbox" checked>
+          <div><div class="toggle-label">Як кандидат справляється з тиском або складними ситуаціями?</div><div class="toggle-sublabel">Приклад із реального досвіду</div></div>
+        </label>
+        <label class="toggle-item on pink-mode" data-group="open">
+          <input type="checkbox" checked>
+          <div><div class="toggle-label">Зони росту кандидата</div><div class="toggle-sublabel">Чесна та конструктивна відповідь</div></div>
+        </label>
+        <label class="toggle-item on pink-mode" data-group="open">
+          <input type="checkbox" checked>
+          <div><div class="toggle-label">Загальна рекомендація</div><div class="toggle-sublabel">Чи рекомендуєте і чому?</div></div>
+        </label>
+        <label class="toggle-item pink-mode" data-group="open">
+          <input type="checkbox">
+          <div><div class="toggle-label">Що відрізняє цього кандидата від інших?</div><div class="toggle-sublabel">Унікальні риси або навички</div></div>
+        </label>
+      </div>
+      <button class="add-btn pink" onclick="addCustomQuestion('open-group','open-count','open')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Додати своє питання
+      </button>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-card">
+      <h3>Готово? Створіть посилання!</h3>
+      <p>Референт відкриє його і за 5 хв заповнить відповіді. Ви отримаєте результат у Telegram або PDF.</p>
+      <button class="btn-primary" onclick="generateLink()">Створити посилання →</button>
+    </div>
+
+    <!-- Result -->
+    <div class="result-block" id="result-block">
+      <h3>
+        <svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5" style="margin-right:6px">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Посилання для референта готове!
+      </h3>
+      <div class="info-box">
+        <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        Скопіюйте або надішліть в Telegram — референт відкриє форму прямо в браузері
+      </div>
+      <div class="link-box">
+        <span class="link-url" id="gen-link-text">—</span>
+        <button class="btn-copy" onclick="copyLink()">Копіювати</button>
+      </div>
+      <button class="btn-tg" onclick="sendToTelegram()">
+        <svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="white">
+          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.932z"/>
+        </svg>
+        Відправити в Telegram
+      </button>
+    </div>
+
+    <div class="footer" style="margin-top:2rem">© 2026 · Sviatoslav Navolskyi</div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     REFERENCE MODE
+════════════════════════════════════════════ -->
+<div id="ref-mode">
+  <div class="hero">
+    <div class="geo geo1"></div>
+    <div class="geo geo2"></div>
+    <div class="geo geo3"></div>
+    <div class="logo">
+      <div class="logo-text">Reference<em> Check</em></div>
+    </div>
+    <h1>Форма рекомендації</h1>
+    <p>Ваш відгук допоможе рекрутеру прийняти правильне рішення</p>
+    <div class="hero-badge">
+      <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      Усі відповіді конфіденційні · ~5 хвилин
+    </div>
+  </div>
+
+  <div class="body">
+
+    <div class="candidate-banner">
+      <div class="candidate-avatar" id="ref-avatar"></div>
+      <div class="candidate-info">
+        <h2 id="ref-cand-name"></h2>
+        <p id="ref-cand-role"></p>
+      </div>
+    </div>
+
+    <div class="ref-card">
+      <div class="section-tag" style="margin-bottom:10px">Ваші дані (заповнив рекрутер)</div>
+      <div class="ref-info-row" id="ref-chips"></div>
+    </div>
+
+    <div class="personal-msg hidden" id="ref-personal-msg"></div>
+
+    <!-- Contact block -->
+    <div class="ref-card" id="ref-contact-card">
+      <div class="card-header" style="margin-bottom:1rem">
+        <div class="step-num" style="background:var(--cyan)">0</div>
+        <div>
+          <div class="card-title">Ваш контакт <span style="color:var(--pink)">*</span></div>
+          <div class="card-sub">Щоб рекрутер міг зв'язатися з вами</div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">Тип контакту</label>
+        <select id="ref-contact-type" onchange="updateContactPlaceholder()">
+          <option value="telegram">Telegram</option>
+          <option value="email">Email</option>
+          <option value="linkedin">LinkedIn</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl">Значення <span class="req">*</span></label>
+        <div class="prefix-wrap" id="ref-contact-prefix-wrap">
+          <span class="prefix-sym" id="ref-contact-prefix">@</span>
+          <input type="text" id="ref-contact-value" placeholder="username">
+        </div>
+      </div>
+    </div>
+
+    <!-- Closed questions -->
+    <div class="ref-card" id="ref-closed-section">
+      <div class="card-header" style="margin-bottom:1rem">
+        <div class="step-num">1</div>
+        <div>
+          <div class="card-title">Оцінки компетенцій</div>
+          <div class="card-sub">Шкала: 1 — нижче очікувань, 3 — на рівні, 5 — значно перевершує</div>
+        </div>
+      </div>
+      <div id="ref-closed-questions"></div>
+    </div>
+
+    <!-- Open questions -->
+    <div class="ref-card" id="ref-open-section">
+      <div class="card-header" style="margin-bottom:1rem">
+        <div class="step-num" style="background:var(--pink)">2</div>
+        <div>
+          <div class="card-title">Відкриті питання</div>
+          <div class="card-sub">Що детальніше — то цінніше для рекрутера</div>
+        </div>
+      </div>
+      <div id="ref-open-questions"></div>
+    </div>
+
+    <!-- Submit -->
+    <div class="submit-section" id="submit-section">
+      <p>Натисніть кнопку — готовий текст скопіюється і відкриється чат з рекрутером. Залишиться вставити і надіслати.</p>
+      <button class="btn-submit-tg" onclick="submitToTelegram()">
+        <svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="white">
+          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.932z"/>
+        </svg>
+        Надіслати рекомендацію в Telegram
+      </button>
+      <button class="btn-submit-pdf" onclick="downloadPDF()">
+        <svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="12" y1="18" x2="12" y2="12"/>
+          <polyline points="9 15 12 18 15 15"/>
+        </svg>
+        Завантажити PDF
+      </button>
+    </div>
+
+    <!-- Success -->
+    <div id="success-screen">
+      <div class="success-card">
+        <div class="success-icon">✓</div>
+        <h2>Дякуємо!</h2>
+        <p id="success-msg">Рекомендацію надіслано рекрутеру. Ваш відгук — велика допомога!</p>
+      </div>
+    </div>
+
+    <div class="footer" id="ref-footer">© 2026 · Sviatoslav Navolskyi</div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     TELEGRAM MODAL
+════════════════════════════════════════════ -->
+<div class="tg-modal-overlay" id="tg-modal-overlay">
+  <div class="tg-modal">
+    <h3>📨 Надіслати в Telegram</h3>
+    <p>Скопіюйте текст, потім відкрийте чат і вставте (Ctrl+V / Cmd+V).</p>
+    <div class="tg-msg-box" id="tg-modal-text"></div>
+    <div class="tg-modal-btns">
+      <button class="btn-tg-copy" id="tg-copy-btn" onclick="tgModalCopy()">📋 Скопіювати повідомлення</button>
+      <button class="btn-tg-open" onclick="tgModalOpen()">
+        <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="white">
+          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.932z"/>
+        </svg>
+        Відкрити чат у Telegram
+      </button>
+      <button class="btn-tg-close" onclick="closeTgModal()">Закрити</button>
+    </div>
+  </div>
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>

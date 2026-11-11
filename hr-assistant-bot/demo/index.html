@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI HR Assistant · Demo</title>
+<meta name="description" content="A simulated chat with an HR Telegram bot that answers employee questions from company documents.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F5F1; --ink:#182233; --muted:#5A6474; --line:#D9DDD3;
+  --sun:#E8A900; --sun-soft:#FBEFC7; --link:#2D5BA8;
+  --chat-bg:#DCE5EC; --bubble-bot:#FFFFFF; --bubble-me:#E3F7D2; --chat-ink:#16202B; --chat-muted:#6E7A86;
+  --bar:#FFFFFF; --accent:#3390EC;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#141A24; --ink:#E9ECEF; --muted:#9AA4B2; --line:#2A3342;
+    --sun:#F2BC1B; --sun-soft:#3A3115; --link:#8EB2F0;
+    --chat-bg:#0E1621; --bubble-bot:#182533; --bubble-me:#2B5278; --chat-ink:#E8EEF3; --chat-muted:#8A9AAB;
+    --bar:#17212B; --accent:#5EA8F2;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.6 'Golos Text',system-ui,-apple-system,'Segoe UI',sans-serif}
+.page{max-width:1080px;margin:0 auto;padding:40px 24px 56px}
+a{color:var(--link);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-offset:2px;border-radius:6px}
+.back{font-weight:500;font-size:15px}
+h1{font:700 clamp(30px,5vw,44px)/1.1 'Unbounded','Golos Text',sans-serif;letter-spacing:-0.02em;margin:24px 0 12px}
+.lede{max-width:40em;margin:0 0 32px;color:var(--muted)}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);gap:40px;align-items:start}
+.side h2{font:500 15px/1.4 'Unbounded',sans-serif;color:var(--muted);margin:0 0 12px}
+.asks{list-style:none;margin:0 0 32px;padding:0;display:flex;flex-direction:column;gap:8px}
+.asks button{
+  width:100%;text-align:left;font:500 16px/1.4 'Golos Text',sans-serif;color:var(--ink);
+  background:transparent;border:1px solid var(--line);border-radius:12px;padding:10px 14px;cursor:pointer;
+  display:flex;justify-content:space-between;gap:12px;align-items:baseline;
+}
+.asks button:hover{border-color:var(--muted)}
+.asks .lang{font-size:13px;color:var(--muted);white-space:nowrap}
+.asks .concept{font-size:12px;font-weight:600;color:var(--ink);background:var(--sun-soft);border:1px solid var(--sun);border-radius:999px;padding:0 8px;white-space:nowrap}
+.how{margin:0 0 24px;padding:0;list-style:none;display:grid;gap:14px}
+.how li{display:grid;grid-template-columns:28px 1fr;gap:10px;color:var(--muted);font-size:15px}
+.how b{color:var(--ink);font-weight:600}
+.how .n{font:700 14px/26px 'Unbounded',sans-serif;color:var(--ink);text-align:center;border:1px solid var(--line);border-radius:50%;height:28px}
+.report-btn{font:600 16px 'Golos Text',sans-serif;color:var(--link);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+/* ---------- Telegram-style chat ---------- */
+.phone{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--chat-bg);display:flex;flex-direction:column;height:640px;max-height:80vh;position:sticky;top:20px}
+.bar{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bar);border-bottom:1px solid var(--line)}
+.ava{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#5EB5F7,#3390EC);color:#fff;display:grid;place-items:center;font-size:20px;flex-shrink:0}
+.bar .name{font-weight:600;font-size:16px;color:var(--chat-ink);line-height:1.2}
+.bar .status{font-size:13px;color:var(--chat-muted)}
+.bar .status.typing{color:var(--accent)}
+.feed{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:86%;padding:8px 12px 6px;border-radius:14px;font-size:15px;line-height:1.45;color:var(--chat-ink);white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+.msg.bot{align-self:flex-start;background:var(--bubble-bot);border-bottom-left-radius:4px}
+.msg.me{align-self:flex-end;background:var(--bubble-me);border-bottom-right-radius:4px}
+.msg .time{display:block;text-align:right;font-size:11px;color:var(--chat-muted);margin-top:2px}
+.msg .src{display:block;margin-top:6px;padding-top:6px;border-top:1px solid rgba(127,140,155,.25);font-size:13px;color:var(--chat-muted)}
+.msg .tag{display:inline-block;font-size:11px;font-weight:600;border-radius:999px;padding:0 8px;margin-bottom:4px;background:var(--sun-soft);border:1px solid var(--sun);color:var(--chat-ink)}
+.compose{display:flex;gap:8px;padding:10px;background:var(--bar);border-top:1px solid var(--line)}
+.compose input{flex:1;min-width:0;font:400 15px 'Golos Text',sans-serif;color:var(--chat-ink);background:transparent;border:0;padding:8px 6px}
+.compose input::placeholder{color:var(--chat-muted)}
+.compose button{border:0;background:var(--accent);color:#fff;font:600 14px 'Golos Text',sans-serif;border-radius:999px;padding:0 16px;cursor:pointer}
+
+/* ---------- HR report ---------- */
+dialog{border:1px solid var(--line);border-radius:16px;padding:28px;max-width:560px;width:calc(100% - 32px);background:var(--paper);color:var(--ink)}
+dialog::backdrop{background:rgba(10,14,20,.55)}
+dialog h3{font:700 19px/1.3 'Unbounded',sans-serif;margin:0 0 4px}
+dialog .sub{color:var(--muted);font-size:14px;margin:0 0 20px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 20px}
+.kpis div{border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.kpis b{display:block;font:700 22px/1.2 'Unbounded',sans-serif}
+.kpis span{font-size:13px;color:var(--muted)}
+dialog h4{font-size:15px;margin:16px 0 6px}
+dialog ol,dialog ul{margin:0;padding-left:20px;font-size:15px}
+dialog .close{margin-top:22px;font:600 15px 'Golos Text',sans-serif;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:8px 18px;cursor:pointer}
+
+@media (max-width:860px){
+  .layout{grid-template-columns:1fr}
+  .phone{position:static;height:560px}
+}
+@media (prefers-reduced-motion: reduce){ .feed{scroll-behavior:auto} }
+</style>
+</head>
+<body>
+<div class="page">
+  <a class="back" href="../../">← All tools</a>
+  <h1>AI HR Assistant</h1>
+  <p class="lede">A Telegram bot that answers employees' HR questions from the company's own documents, in the language they write in. This page simulates a chat with sample policies, so you can see how it behaves without Telegram.</p>
+
+  <div class="layout">
+    <div class="side">
+      <h2>Ask a question</h2>
+      <ul class="asks" id="asks"></ul>
+
+      <h2>What happens behind the scenes</h2>
+      <ol class="how">
+        <li><span class="n">1</span><span><b>Finds the right passages.</b> HR policies (PDF, Word, text) are split into chunks and searched by meaning, not by exact words.</span></li>
+        <li><span class="n">2</span><span><b>Answers only from them.</b> The language model writes the reply using those passages only and links the source document.</span></li>
+        <li><span class="n">3</span><span><b>Admits what it doesn't know.</b> If the documents have no answer, it sends the person to HR instead of guessing, and logs the question.</span></li>
+        <li><span class="n">4</span><span><b>Reports to HR monthly.</b> Unanswered questions show HR exactly which policies are missing.</span></li>
+      </ol>
+      <button class="report-btn" id="open-report" type="button">See the monthly report HR receives</button>
+    </div>
+
+    <div class="phone" aria-label="Simulated Telegram chat">
+      <div class="bar">
+        <div class="ava" aria-hidden="true">🤖</div>
+        <div><div class="name">HR Assistant</div><div class="status" id="status">bot</div></div>
+      </div>
+      <div class="feed" id="feed" aria-live="polite"></div>
+      <form class="compose" id="compose">
+        <input id="input" type="text" placeholder="Write a message…" autocomplete="off" aria-label="Your question">
+        <button type="submit">Send</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<dialog id="report">
+  <h3>Monthly report for HR</h3>
+  <p class="sub">Sent by email on the 1st of each month. Sample data.</p>
+  <div class="kpis">
+    <div><b>412</b><span>questions</span></div>
+    <div><b>87</b><span>people asked</span></div>
+    <div><b>91%</b><span>answered</span></div>
+  </div>
+  <h4>Top questions</h4>
+  <ol>
+    <li>How many vacation days do I get? (54)</li>
+    <li>How do I take sick leave? (38)</li>
+    <li>What is covered by the health insurance? (29)</li>
+    <li>When is salary paid? (24)</li>
+    <li>What do I need to do in my first week? (19)</li>
+  </ol>
+  <h4>Questions the bot couldn't answer</h4>
+  <ul>
+    <li>Can I bring my dog to the office? (6)</li>
+    <li>Is there a budget for a home office chair? (5)</li>
+    <li>How do I change my bank details for salary? (3)</li>
+  </ul>
+  <p class="sub" style="margin:14px 0 0">These are the gaps HR should cover in the knowledge base next.</p>
+  <button class="close" type="button" id="close-report">Close</button>
+</dialog>
+
+<script>
+// All policy texts below are fictional samples written for this demo.
+const SCENARIOS = [
+  {
+    id: 'balance', label: 'Скільки в мене днів відпустки?', lang: 'UA', concept: true,
+    match: /(скільки|залишил|баланс|balance|left).*(дн|відпуст|day|leave)|how many days do i have left/i,
+    answer: 'Святославе, ось ваш баланс на сьогодні:\n\n🏖 Щорічна відпустка: **10 днів**\n🤒 Лікарняні: **3 дні**\n📅 Неоплачувана відпустка: **2 дні**\n\nЗапланувати відпустку можна в PeopleForce, розділ «Відпустки».',
+    tag: 'Concept: personal data from PeopleForce',
+    sources: ['PeopleForce API (leave balances)'],
+  },
+  {
+    id: 'sick', label: 'How do I take sick leave?', lang: 'EN',
+    match: /sick|ill\b|лікарнян|хвор|enferm/i,
+    answer: 'To take sick leave:\n\n1. Tell your team lead before 10:00 on the first day.\n2. Mark the days as **Sick leave** in PeopleForce.\n3. For more than 3 days in a row, upload a doctor\u2019s note.\n\nYou have **5 paid sick days** a year without a note. 🙂',
+    sources: ['sick_leave_policy.pdf'],
+    alt: { ua: 'Щоб узяти лікарняний:\n\n1. Повідомте тімліда до 10:00 першого дня.\n2. Позначте дні як **Лікарняний** у PeopleForce.\n3. Якщо хворієте понад 3 дні поспіль, завантажте довідку від лікаря.\n\nБез довідки у вас є **5 оплачуваних днів** лікарняного на рік.' },
+  },
+  {
+    id: 'vacation_es', label: '¿Cuántos días de vacaciones tengo al año?', lang: 'ES',
+    match: /vacacion|vacation|holiday|відпуст|отпуск|férias/i,
+    answer: 'Tienes **20 días hábiles** de vacaciones pagadas al año.\n\n• Se acumulan mes a mes desde tu primer día.\n• Puedes pasar hasta 5 días no usados al año siguiente.\n• Solicítalas en PeopleForce con al menos 2 semanas de antelación.',
+    sources: ['vacation_policy.pdf'],
+    alt: { ua: 'У вас **20 робочих днів** оплачуваної відпустки на рік.\n\n• Дні накопичуються щомісяця з першого робочого дня.\n• До 5 невикористаних днів можна перенести на наступний рік.\n• Подавайте запит у PeopleForce щонайменше за 2 тижні.', en: 'You get **20 working days** of paid vacation a year.\n\n• Days build up monthly from your first day.\n• Up to 5 unused days carry over to next year.\n• Request leave in PeopleForce at least 2 weeks ahead.' },
+  },
+  {
+    id: 'onboarding', label: 'Що мені зробити в перший тиждень?', lang: 'UA',
+    match: /перш(ий|ого) (тиждень|день)|онбординг|onboarding|first (week|day)/i,
+    answer: 'Ось чекліст на перший тиждень 👋\n\n1. Підписати документи в PeopleForce.\n2. Налаштувати робочу пошту, Slack і 2FA.\n3. Зустрітися з бадді та тімлідом.\n4. Пройти вступний курс про продукт.\n5. Наприкінці тижня — коротка зустріч з HR, щоб поділитися враженнями.',
+    sources: ['onboarding_guide.docx'],
+    alt: { en: 'Here is your first-week checklist 👋\n\n1. Sign your documents in PeopleForce.\n2. Set up work email, Slack and 2FA.\n3. Meet your buddy and team lead.\n4. Complete the intro course about the product.\n5. At the end of the week, a short check-in with HR.' },
+  },
+  {
+    id: 'benefits_pt', label: 'Quais benefícios a empresa oferece?', lang: 'PT',
+    match: /benef|бенефіт|компенс|insurance|страхов|seguro/i,
+    answer: 'A empresa oferece:\n\n🩺 Seguro de saúde após o período de experiência\n🎓 Até **$500 por ano** para cursos e livros\n💻 Equipamento de trabalho fornecido pela empresa\n🧘 Um dia de bem-estar por trimestre',
+    sources: ['benefits.pdf'],
+    alt: { ua: 'Компанія пропонує:\n\n🩺 Медичне страхування після випробувального терміну\n🎓 До **$500 на рік** на курси й книги\n💻 Робочу техніку від компанії\n🧘 Один day off для відновлення щокварталу', en: 'The company offers:\n\n🩺 Health insurance after probation\n🎓 Up to **$500 a year** for courses and books\n💻 Work equipment provided by the company\n🧘 One wellbeing day off per quarter' },
+  },
+  {
+    id: 'dog', label: 'Can I bring my dog to the office?', lang: 'EN',
+    match: /dog|pet|собак|тварин|perro|cachorro/i,
+    answer: 'Sorry, I couldn\u2019t find an answer to this in the company knowledge base. Please contact the HR team directly.',
+    notFound: true,
+    sources: [],
+  },
+];
+
+const FALLBACK = {
+  ua: 'На жаль, я не знайшов відповіді на це питання в базі знань. Будь ласка, зверніться до HR-команди безпосередньо.',
+  en: 'Sorry, I couldn\u2019t find an answer to this in the company knowledge base. Please contact the HR team directly.',
+};
+
+const feed = document.getElementById('feed');
+const statusEl = document.getElementById('status');
+const input = document.getElementById('input');
+let busy = false;
+
+function now() { return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+
+function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function richText(s) { return escapeHtml(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
+
+function addMessage(who, text, extra) {
+  const el = document.createElement('div');
+  el.className = 'msg ' + who;
+  let html = '';
+  if (extra && extra.tag) html += `<span class="tag">${escapeHtml(extra.tag)}</span>\n`;
+  html += richText(text);
+  if (extra && extra.sources && extra.sources.length) {
+    html += `<span class="src">📎 Джерела:\n${extra.sources.map(s => '• ' + escapeHtml(s)).join('\n')}</span>`;
+  }
+  if (extra && extra.notFound) {
+    html += '<span class="src">Logged as unanswered for the monthly HR report.</span>';
+  }
+  html += `<span class="time">${now()}</span>`;
+  el.innerHTML = html;
+  feed.appendChild(el);
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function botReply(scenario, fallbackLang) {
+  busy = true;
+  statusEl.textContent = 'typing…';
+  statusEl.classList.add('typing');
+  const delay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 200 : 1100;
+  setTimeout(() => {
+    statusEl.textContent = 'bot';
+    statusEl.classList.remove('typing');
+    if (scenario) addMessage('bot', scenario.answer, scenario);
+    else addMessage('bot', FALLBACK[fallbackLang], { notFound: true });
+    busy = false;
+  }, delay);
+}
+
+// The real bot replies in the language of the question; the demo mimics that.
+function detectLang(text) {
+  if (/[а-яіїєґ]/i.test(text)) return 'ua';
+  if (/[ñ¿¡]|vacacion|cuánt|cuant|tengo/i.test(text)) return 'es';
+  if (/[ãõç]|quais|férias|ferias|empresa oferece/i.test(text)) return 'pt';
+  return 'en';
+}
+
+function ask(text, scenario) {
+  if (busy || !text.trim()) return;
+  addMessage('me', text.trim());
+  let lang = scenario ? scenario.lang.toLowerCase() : detectLang(text);
+  if (!scenario) scenario = SCENARIOS.find(s => s.match.test(text));
+  if (scenario && scenario.lang.toLowerCase() !== lang && scenario.alt && scenario.alt[lang]) {
+    scenario = Object.assign({}, scenario, { answer: scenario.alt[lang] });
+  }
+  botReply(scenario, lang === 'ua' ? 'ua' : 'en');
+}
+
+const asks = document.getElementById('asks');
+SCENARIOS.forEach(s => {
+  const li = document.createElement('li');
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.innerHTML = `<span>${escapeHtml(s.label)}</span>` +
+    (s.concept ? '<span class="concept">concept</span>' : `<span class="lang">${s.lang}</span>`);
+  b.addEventListener('click', () => ask(s.label, s));
+  li.appendChild(b);
+  asks.appendChild(li);
+});
+
+document.getElementById('compose').addEventListener('submit', e => {
+  e.preventDefault();
+  ask(input.value);
+  input.value = '';
+});
+
+addMessage('bot',
+  '👋 Привіт! Я HR-асистент компанії.\n\nЯ можу відповісти на питання щодо:\n• 📋 Політик та процедур\n• 🏖️ Відпусток та лікарняних\n• 💰 Бенефітів та компенсацій\n• 📝 Онбордингу\n\nПросто напишіть своє запитання. Я підтримую 🇺🇦 🇬🇧 🇧🇷 🇮🇳 🇪🇸');
+
+const report = document.getElementById('report');
+document.getElementById('open-report').addEventListener('click', () => report.showModal());
+document.getElementById('close-report').addEventListener('click', () => report.close());
+</script>
+</body>
+</html>
